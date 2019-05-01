@@ -21,6 +21,7 @@ set -u
 
 thisDir=$(dirname $0);
 thisScript=$(basename $0);
+export PATH=$thisDir/../scripts:$PATH
 
 if [ "$FAST5DIR" == "" ]; then
     echo "Usage: $thisScript outdir fast5dir/"
@@ -40,7 +41,7 @@ echo "$0: temp dir is $tmpdir";
 uuid1=$(uuidgen)
 jobName1="basecall-$uuid1"
 qsub -pe smp 1-$NSLOTS -N $jobName1 -cwd -o log/$jobName1.log -j y \
-  $thisDir/01_basecall.sh $OUTDIR $FAST5DIR
+  01_basecall.sh $OUTDIR $FAST5DIR
 
 # Now that it is demultiplexed, deal with each sample at a time.
 for barcodeDir in $OUTDIR/demux/barcode[0-9]*; do
@@ -49,18 +50,18 @@ for barcodeDir in $OUTDIR/demux/barcode[0-9]*; do
   uuid2=$(uuidgen)
   jobName2="prepSample-$uuid2"
   qsub -hold_jid $jobName1 -pe smp 1-$NSLOTS -N $jobName2 -cwd -o log/$jobName2.log -j y \
-    $thisDir/03_prepSample.sh $barcodeDir
+    03_prepSample.sh $barcodeDir
   
   # Assemble the sample
   uuid3=$(uuidgen)
   jobName3="assemble-$uuid3"
   qsub -hold_jid $jobName2 -pe smp 1-$NSLOTS -N $jobName3 -cwd -o log/$jobName3.log -j y \
-    $thisDir/05_assemble.sh $barcodeDir
+    05_assemble.sh $barcodeDir
 
   # Polish the sample
   uuid4=$(uuidgen)
   jobName4="assemble-$uuid4"
   qsub -hold_jid $jobName3 -pe smp 1-$NSLOTS -N $jobName4 -cwd -o log/$jobName4.log -j y \
-    $thisDir/07_nanopolish.sh $barcodeDir $FAST5DIR
+    07_nanopolish.sh $barcodeDir $FAST5DIR
 
 done
