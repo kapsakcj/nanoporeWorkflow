@@ -2,7 +2,7 @@
 #$ -o wtdbg2.log
 #$ -j y
 #$ -N wtdbg2
-#$ -pe smp 1
+#$ -pe smp 1-36
 #$ -V -cwd
 #$ -l gpu=1
 set -e
