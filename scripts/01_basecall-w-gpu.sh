@@ -40,7 +40,7 @@ hostname
 # Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
 tmpdir=$(mktemp -p /tmp/pjx8/ -d guppy.gpu.XXXXXX)
 # rm -rf $tmpdir removed so that it doesn't delete files - TODO add back later
-trap ' { echo "END - $(date)"; } ' EXIT
+trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
 
