@@ -1,10 +1,12 @@
 #!/bin/bash
 #$ -o wtdbg2.log
+#$ -e wtdbg2.err
 #$ -j y
 #$ -N wtdbg2
 #$ -pe smp 2-16
-#$ -V -cwd
-#$ -l gpu=1
+#$ -V
+#$ -cwd
+#####$ -l gpu=1 commented out cuz guppy runs in cpu mode
 set -e
 
 source /etc/profile.d/modules.sh
