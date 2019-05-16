@@ -51,8 +51,8 @@ module load qcat/1.0.1
 # should return version 3.0.3
 guppy_basecaller -v
 # basecalling
-# check to see if basecalling has been done by checking OUTDIR for sequencing_summary.txt
-if [[ -e $OUTDIR/fastq/sequencing_summary.txt ]]; then
+# check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
+if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
   echo "FAST5 files have already been basecalled. Skipping."
 else
   guppy_basecaller -i $FAST5DIR -s $tmpdir/fastq --gpu_runners_per_device 50 --num_callers $NSLOTS --flowcell FLO-MIN106 --kit SQK-LSK109 --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto --chunks_per_runner 96
@@ -75,8 +75,8 @@ else
 fi
 
 # retain the sequencing summary
-if [[ -e $tmpdir/demux/sequencing_summary.txt ]]; then
-  echo "sequencing_summary.txt has already been hardlinked into demux/"
+if [[ -e ${OUTDIR}demux/sequencing_summary.txt ]]; then
+  echo "sequencing_summary.txt has already been hardlinked into OUTDIR/demux/"
 else
   ln -v $tmpdir/fastq/sequencing_summary.txt $tmpdir/demux
 fi
@@ -95,7 +95,7 @@ else
 fi
 
 # create subdirectories for each barcode, move fastq file there (does not do so for none.fastq)
-if [[ -e ${OUTDIR}demux/barcode01/ ]]; then
+if [[ -e ${OUTDIR}demux/barcode06/ || -e ${OUTDIR}demux/barcode01/ ]]; then
   echo "fastqs assigned a barcode have already been moved into subdirs. Skipping"
 else
   for fastq in ${OUTDIR}demux/barcode*.fastq; do
