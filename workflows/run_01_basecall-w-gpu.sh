@@ -7,6 +7,9 @@ fi
 OUTDIR=$1
 FAST5DIR=$2
 
+echo '$OUTDIR is set to:' $OUTDIR
+echo '$FAST5DIR is set to :' $FAST5DIR
+
 if [ "$FAST5DIR" == "" ]; then
     echo "Usage: $0 outdir fast5dir/"
     echo "  The outdir will represent each sample in a 'barcode__' subdirectory"
