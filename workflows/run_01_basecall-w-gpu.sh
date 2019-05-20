@@ -13,6 +13,7 @@ make_directory() {
 
 OUTDIR=$1
 FAST5DIR=$2
+MODE=$3
 
 if find ${OUTDIR}log/logfile-gpu-basecalling.txt;
 then
@@ -21,8 +22,9 @@ then
     echo "--------------------------------" >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
 fi
 
-echo '$OUTDIR is set to:' $OUTDIR
-echo '$FAST5DIR is set to :' $FAST5DIR
+echo '$OUTDIR is set to:' ${OUTDIR}
+echo '$FAST5DIR is set to :' ${FAST5DIR}
+echo '$MODE is set to :' ${MODE}
 
 if [ "$FAST5DIR" == "" ]; then
     echo "Specified dirs MUST end with a '/'"
@@ -33,4 +35,4 @@ fi;
 
 make_directory ${OUTDIR}log
 
-command time -v /scicomp/home/pjx8/github/nanoporeWorkflow/scripts/01_basecall-w-gpu.sh $OUTDIR $FAST5DIR |& tee ${OUTDIR}log/logfile-gpu-basecalling.txt
+command time -v /scicomp/home/pjx8/github/nanoporeWorkflow/scripts/01_basecall-w-gpu.sh ${OUTDIR} ${FAST5DIR} ${MODE} |& tee ${OUTDIR}log/logfile-gpu-basecalling.txt

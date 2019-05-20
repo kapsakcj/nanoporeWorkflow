@@ -17,7 +17,7 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=32}
+NSLOTS=${NSLOTS:=36}
 
 OUTDIR=$1
 FAST5DIR=$2
@@ -26,23 +26,40 @@ LONGREADCOVERAGE=50  # How much coverage to target with long reads
 
 set -u
 
-if [ "$FAST5DIR" == "" ]; then
+if [[ "$FAST5DIR" == "" ]]; then
     echo "Usage: $0 outdir fast5dir/"
     echo "  The outdir will represent each sample in a 'barcode__' subdirectory"
     exit 1;
 fi;
 
+# check to make sure $MODE is set to either 'fast' or 'hac'
+if [[ "$3" != "fast" || "$3" != "hac" ]]; then
+    echo "Usage: $0 outdir/ fast5dir/ fast"
+    echo "OR"
+    echo "Usage: $0 outdir/ fast5dir/ hac"
+    echo "  Please specify 'fast' or 'hac' as the third argument to specify which basecaller model & config to use"
+    exit 1;
+fi;
+
+
 # Setup any debugging information
 date
 hostname
+echo '$USER is set to:' $USER
 
 # Setup tempdir in /tmp
 # Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
-tmpdir=$(mktemp -p /tmp/pjx8/ -d guppy.gpu.XXXXXX)
+tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
 # rm -rf $tmpdir removed so that it doesn't delete files - TODO add back later
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
+
+#copy fast5s to $tmpdir
+make_directory $tmpdir/fast5
+fast5tmp=$tmpdir/fast5
+echo '$fast5tmp dir is set to:' $fast5tmp
+cp -rv $FAST5DIR $fast5tmp
 
 # no module load for guppy, since it's installed natively on node 98
 module load qcat/1.0.1
@@ -55,7 +72,11 @@ guppy_basecaller -v
 if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
   echo "FAST5 files have already been basecalled. Skipping."
 else
-  guppy_basecaller -i $FAST5DIR -s $tmpdir/fastq --gpu_runners_per_device 50 --num_callers $NSLOTS --flowcell FLO-MIN106 --kit SQK-LSK109 --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto --chunks_per_runner 96
+  if [[ "$3" == "hac"  ]]; then
+  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto
+  elif [[ "$3" == "fast" ]]; then
+  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --kit SQK_LSK109 --flowcell FLO-MIN106 --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn --chunk_size 10000 --gpu_runners_per_device 7 --chunks_per_runner 256 --overlap 50 --qscore_offset -0.4 --qscore_scale 0.98 --builtin_scripts 1 --disable_pings
+  fi
 fi
 
 #### Commented out to try qcat instead
@@ -98,9 +119,11 @@ fi
 if [[ -e ${OUTDIR}demux/barcode06/ || -e ${OUTDIR}demux/barcode01/ ]]; then
   echo "fastqs assigned a barcode have already been moved into subdirs. Skipping"
 else
+  echo "Moving demuxed reads into subdirs...."
   for fastq in ${OUTDIR}demux/barcode*.fastq; do
-    mkdir ${OUTDIR}demux/$(echo ${fastq} | cut -d '/' -f 3 | cut -d '.' -f 1)
-    mv $fastq $(echo $fastq | cut -d '.' -f 1)
+    dir="${fastq%%.fastq}"
+    mkdir -- "$dir"
+    mv -- "$fastq" "$dir"
   done
 fi
 # making OUTDIR available to runner script for copying logfile into $tmpdir/log
