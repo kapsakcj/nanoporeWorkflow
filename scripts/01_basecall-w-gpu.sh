@@ -22,7 +22,7 @@ NSLOTS=${NSLOTS:=36}
 OUTDIR=$1
 FAST5DIR=$2
 GENOMELENGTH=5000000 # TODO make this a parameter
-LONGREADCOVERAGE=50  # How much coverage to target with long reads:wq
+LONGREADCOVERAGE=50  # How much coverage to target with long reads
 
 
 if [[ "$FAST5DIR" == "" ]]; then
