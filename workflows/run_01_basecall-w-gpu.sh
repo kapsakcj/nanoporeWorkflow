@@ -15,7 +15,7 @@ OUTDIR=$1
 FAST5DIR=$2
 MODE=$3
 
-if find ${OUTDIR}log/logfile-gpu-basecalling.txt;
+if find ${OUTDIR}log/logfile-gpu-basecalling.txt 2>/dev/null ;
 then
     cat ${OUTDIR}log/logfile-gpu-basecalling.txt >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
     echo "--------------------------------" >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
@@ -24,7 +24,6 @@ fi
 
 echo '$OUTDIR is set to:' ${OUTDIR}
 echo '$FAST5DIR is set to :' ${FAST5DIR}
-echo '$MODE is set to :' ${MODE}
 
 if [ "$FAST5DIR" == "" ]; then
     echo "Specified dirs MUST end with a '/'"

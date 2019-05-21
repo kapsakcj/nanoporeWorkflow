@@ -22,9 +22,8 @@ NSLOTS=${NSLOTS:=36}
 OUTDIR=$1
 FAST5DIR=$2
 GENOMELENGTH=5000000 # TODO make this a parameter
-LONGREADCOVERAGE=50  # How much coverage to target with long reads
+LONGREADCOVERAGE=50  # How much coverage to target with long reads:wq
 
-set -u
 
 if [[ "$FAST5DIR" == "" ]]; then
     echo "Usage: $0 outdir fast5dir/"
@@ -33,14 +32,25 @@ if [[ "$FAST5DIR" == "" ]]; then
 fi;
 
 # check to make sure $MODE is set to either 'fast' or 'hac'
-if [[ "$3" != "fast" || "$3" != "hac" ]]; then
-    echo "Usage: $0 outdir/ fast5dir/ fast"
-    echo "OR"
-    echo "Usage: $0 outdir/ fast5dir/ hac"
-    echo "  Please specify 'fast' or 'hac' as the third argument to specify which basecaller model & config to use"
-    exit 1;
-fi;
+case $3 in
+    fast)
+      echo '$MODE set to: "fast"'
+      ;;
+    hac)
+      echo '$MODE set to: "hac"'
+      ;;
+    *| "" )
+      echo ""
+      echo "    Usage: $0 outdir/ fast5dir/ fast"
+      echo "               OR"
+      echo "    Usage: $0 outdir/ fast5dir/ hac"
+      echo ""
+      echo "Please specify 'fast' or 'hac' as the third argument to specify which basecaller model & config to use"
+      exit 1
+      ;;
+esac
 
+set -u
 
 # Setup any debugging information
 date
@@ -59,7 +69,15 @@ echo "$0: temp dir is $tmpdir";
 make_directory $tmpdir/fast5
 fast5tmp=$tmpdir/fast5
 echo '$fast5tmp dir is set to:' $fast5tmp
-cp -rv $FAST5DIR $fast5tmp
+
+# check to see if basecalling/demultiplexing has been done and files exist in OUTDIR
+# if not, copy files into fast5tmp and begin
+if [[ -e  ${OUTDIR}demux/ ]]; then
+    echo "Demuxed fastqs present in OUTDIR. Exiting script..."
+    exit 0
+  else
+    cp -rv $FAST5DIR $fast5tmp
+fi
 
 # no module load for guppy, since it's installed natively on node 98
 module load qcat/1.0.1
@@ -73,15 +91,11 @@ if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
   echo "FAST5 files have already been basecalled. Skipping."
 else
   if [[ "$3" == "hac"  ]]; then
-  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto
+  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_hac.jsn --chunk_size 1000 --gpu_runners_per_device 7 --chunks_per_runner 1100 --chunks_per_caller 10000 --overlap 50 --qscore_offset 0.25 --qscore_scale 0.91 --builtin_scripts 1 --disable_pings
   elif [[ "$3" == "fast" ]]; then
-  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --kit SQK_LSK109 --flowcell FLO-MIN106 --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn --chunk_size 10000 --gpu_runners_per_device 7 --chunks_per_runner 256 --overlap 50 --qscore_offset -0.4 --qscore_scale 0.98 --builtin_scripts 1 --disable_pings
+  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --kit SQK-LSK109 --flowcell FLO-MIN106 --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn --chunk_size 10000 --gpu_runners_per_device 7 --chunks_per_runner 256 --overlap 50 --qscore_offset -0.4 --qscore_scale 0.98 --builtin_scripts 1 --disable_pings
   fi
 fi
-
-#### Commented out to try qcat instead
-# Demultiplex.  -r for recursive fastq search.
-###guppy_barcoder -t $NSLOTS -r -i $tmpdir/fastq -s $tmpdir/demux
 
 # should return qcat 1.0.1
 qcat --version
@@ -102,13 +116,7 @@ else
   ln -v $tmpdir/fastq/sequencing_summary.txt $tmpdir/demux
 fi
 
-#### Commented out because qcat doesn't produce separate directories per barcode
-# Make a relative path symlink to the sequencing summary
-# file for each barcode subdirectory
-#for barcodeDir in $tmpdir/demux/barcode[0-12]* $tmpdir/demux/unclassified; do
-#  ln -sv ../sequencing_summary.txt $barcodeDir/;
-#done
-
+# copy demuxed fastqs into the specified OUTDIR
 if [[ -e $OUTDIR/demux/none.fastq ]]; then
   echo "Demuxed fastqs have been transferred from tmpdir to OUTDIR. Skipping."
 else
@@ -126,5 +134,6 @@ else
     mv -- "$fastq" "$dir"
   done
 fi
+
 # making OUTDIR available to runner script for copying logfile into $tmpdir/log
 export OUTDIR
