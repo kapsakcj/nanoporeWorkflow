@@ -21,14 +21,14 @@ NSLOTS=${NSLOTS:=36}
 
 OUTDIR=$1
 FAST5DIR=$2
-GENOMELENGTH=5000000 # TODO make this a parameter
-LONGREADCOVERAGE=50  # How much coverage to target with long reads
-
 
 if [[ "$FAST5DIR" == "" ]]; then
-    echo "Usage: $0 outdir fast5dir/"
-    echo "  The outdir will represent each sample in a 'barcode__' subdirectory"
-    exit 1;
+      echo ""
+      echo "    Usage: $0 outdir/ fast5dir/ fast"
+      echo "               OR"
+      echo "    Usage: $0 outdir/ fast5dir/ hac"
+      echo ""
+      exit 1;
 fi;
 
 # check to make sure $MODE is set to either 'fast' or 'hac'
@@ -60,12 +60,11 @@ echo '$USER is set to:' $USER
 # Setup tempdir in /tmp
 # Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
 tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
-# rm -rf $tmpdir removed so that it doesn't delete files - TODO add back later
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
 
-#copy fast5s to $tmpdir
+# copy fast5s to $tmpdir
 make_directory $tmpdir/fast5
 fast5tmp=$tmpdir/fast5
 echo '$fast5tmp dir is set to:' $fast5tmp
@@ -82,10 +81,9 @@ fi
 # no module load for guppy, since it's installed natively on node 98
 module load qcat/1.0.1
 
-# Basecalling using GPU
+#### Basecalling using GPU ####
 # should return version 3.0.3
 guppy_basecaller -v
-# basecalling
 # check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
 if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
   echo "FAST5 files have already been basecalled. Skipping."

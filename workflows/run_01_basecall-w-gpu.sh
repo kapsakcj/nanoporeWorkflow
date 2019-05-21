@@ -26,9 +26,12 @@ echo '$OUTDIR is set to:' ${OUTDIR}
 echo '$FAST5DIR is set to :' ${FAST5DIR}
 
 if [ "$FAST5DIR" == "" ]; then
+    echo ""
     echo "Specified dirs MUST end with a '/'"
-    echo "Usage: $0 outdir/ fast5dir/"
-    echo "  The outdir will represent each sample in a 'barcode__' subdirectory"
+    echo "Usage: $0 outdir/ fast5dir/ fast"
+    echo "              OR"
+    echo "Usage: $0 outdir/ fast5dir/ hac"
+    echo "  The outdir will represent each sample in a 'demux/barcode__' subdirectory"
     exit 1;
 fi;
 
