@@ -89,9 +89,45 @@ if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
   echo "FAST5 files have already been basecalled. Skipping."
 else
   if [[ "$3" == "hac"  ]]; then
-  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_hac.jsn --chunk_size 1000 --gpu_runners_per_device 7 --chunks_per_runner 1100 --chunks_per_caller 10000 --overlap 50 --qscore_offset 0.25 --qscore_scale 0.91 --builtin_scripts 1 --disable_pings
+  guppy_basecaller -i $fast5tmp \
+                   -s $tmpdir/fastq \
+                   --num_callers $NSLOTS \
+                   --qscore_filtering 7 \
+                   --enable_trimming yes \
+                   --hp_correct yes \
+                   -r \
+                   -x "cuda:0 cuda:1" \
+                   -m /opt/ont/guppy/data/template_r9.4.1_450bps_hac.jsn \
+                   -c /opt/ont/guppy/data/dna_r9.4.1_450bps_hac.cfg \
+                   --chunk_size 1100 \
+                   --gpu_runners_per_device 7 \
+                   --chunks_per_runner 1000 \
+                   --chunks_per_caller 10000 \
+                   --overlap 50 \
+                   --qscore_offset 0.25 \
+                   --qscore_scale 0.91 \
+                   --builtin_scripts 1 \
+                   --disable_pings
   elif [[ "$3" == "fast" ]]; then
-  guppy_basecaller -i $fast5tmp -s $tmpdir/fastq --kit SQK-LSK109 --flowcell FLO-MIN106 --num_callers $NSLOTS --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r -x auto -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn --chunk_size 10000 --gpu_runners_per_device 7 --chunks_per_runner 256 --overlap 50 --qscore_offset -0.4 --qscore_scale 0.98 --builtin_scripts 1 --disable_pings
+  guppy_basecaller -i $fast5tmp \
+                   -s $tmpdir/fastq \
+                   --qscore_filtering 7 \
+                   --enable_trimming yes \
+                   --hp_correct yes \
+                   -r \
+                   -x "cuda:0 cuda:1" \
+                   -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn \
+                   -c /opt/ont/guppy/data/dna_r9.4.1_450bps_fast.cfg \
+                   --chunk_size 1000 \
+                   --gpu_runners_per_device 8 \
+                   --chunks_per_runner 256 \
+                   --chunks_per_caller 10000 \
+                   --overlap 50 \
+                   --qscore_offset -0.4 \
+                   --qscore_scale 0.98 \
+                   --builtin_scripts 1 \
+                   --disable_pings \
+                   --num_callers $NSLOTS
   fi
 fi
 
