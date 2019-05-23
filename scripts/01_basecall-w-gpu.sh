@@ -77,6 +77,7 @@ if [[ -e  ${OUTDIR}demux/ ]]; then
     echo "Demuxed fastqs present in OUTDIR. Exiting script..."
     exit 0
 else
+    echo "Copying reads from $FAST5DIR to $tmpdir"
     cp -rv $FAST5DIR $fast5tmp
 fi
 
