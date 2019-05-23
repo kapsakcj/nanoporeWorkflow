@@ -37,4 +37,6 @@ fi;
 
 make_directory ${OUTDIR}log
 
-command time -v /scicomp/home/pjx8/github/nanoporeWorkflow/scripts/01_basecall-w-gpu.sh ${OUTDIR} ${FAST5DIR} ${MODE} |& tee ${OUTDIR}log/logfile-gpu-basecalling.txt
+thisDir=$(dirname $0)
+
+command time -v ${thisDir}/../scripts/01_basecall-w-gpu.sh ${OUTDIR} ${FAST5DIR} ${MODE} |& tee ${OUTDIR}log/logfile-gpu-basecalling.txt
