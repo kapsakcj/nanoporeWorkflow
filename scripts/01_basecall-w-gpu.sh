@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Curtis Kapsak pjx8@cdc.gov
+
 # UGE options removed, since this must be performed manually on node 98
 # May eventually be added, if GPUs (Tesla V100s) are available via UGE/qsub
 
@@ -18,7 +21,6 @@ source /etc/profile.d/modules.sh
 module purge
 
 NSLOTS=${NSLOTS:=36}
-
 OUTDIR=$1
 FAST5DIR=$2
 
@@ -74,7 +76,7 @@ echo '$fast5tmp dir is set to:' $fast5tmp
 if [[ -e  ${OUTDIR}demux/ ]]; then
     echo "Demuxed fastqs present in OUTDIR. Exiting script..."
     exit 0
-  else
+else
     cp -rv $FAST5DIR $fast5tmp
 fi
 
@@ -150,6 +152,13 @@ else
   ln -v $tmpdir/fastq/sequencing_summary.txt $tmpdir/demux
 fi
 
+# compress fastqs (will later not be necessary with new version of guppy which produces gzipped fastqs)
+uncompressed=$(\ls ${tmpdir}/demux/*.fastq 2>/dev/null || true)
+if [ "$uncompressed" != "" ]; then
+  echo "$uncompressed" | xargs -P $NSLOTS gzip 
+fi
+
+
 # copy demuxed fastqs into the specified OUTDIR
 if [[ -e $OUTDIR/demux/none.fastq ]]; then
   echo "Demuxed fastqs have been transferred from tmpdir to OUTDIR. Skipping."
@@ -162,8 +171,8 @@ if [[ -e ${OUTDIR}demux/barcode06/ || -e ${OUTDIR}demux/barcode01/ ]]; then
   echo "fastqs assigned a barcode have already been moved into subdirs. Skipping"
 else
   echo "Moving demuxed reads into subdirs...."
-  for fastq in ${OUTDIR}demux/barcode*.fastq; do
-    dir="${fastq%%.fastq}"
+  for fastq in ${OUTDIR}demux/barcode*.fastq.gz; do
+    dir="${fastq%%.fastq.gz}"
     mkdir -- "$dir"
     mv -- "$fastq" "$dir"
   done
