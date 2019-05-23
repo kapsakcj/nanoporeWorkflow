@@ -28,6 +28,7 @@ The first positional parameter must be the project folder.  Both input and outpu
   * runs `guppy_basecaller` in either `fast` or `hac` mode
     * According to ONT - High accuracy mode will take anywhere from 5-8X longer to complete basecalling than fast mode, but will result in 2-3% higher read accuracy. 
   * Demultiplexes using `qcat` and additionally trims adapter and barcode sequences (using `--trim` option w/ `qcat`)
+  * Compresses (gzip) the demultiplexed reads
   * Copies demultiplexed & trimmed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
   * Logs STDOUT from last time script was ran in `$OUTDIR/log/logfile-gpu-basecalling.txt` and all previous times in `$OUTDIR/log/logfile-gpu-basecalling_prev.txt`
  
@@ -49,12 +50,12 @@ Usage:
 $OUTDIR
 ├── demux
 │   ├── barcode06
-│   │   └── barcode06.fastq
+│   │   └── barcode06.fastq.gz
 │   ├── barcode10
-│   │   └── barcode10.fastq
+│   │   └── barcode10.fastq.gz
 │   ├── barcode12
-│   │   └── barcode12.fastq
-│   ├── none.fastq
+│   │   └── barcode12.fastq.gz
+│   ├── none.fastq.gz
 │   └── sequencing_summary.txt
 └── log
     ├── logfile-gpu-basecalling_prev.txt # only present if you ran the script more than once
@@ -62,8 +63,8 @@ $OUTDIR
 ```
  
 #### Future plans/To-do:
-  * Compress demuxed reads using `pigz`. Latest release of Guppy v 3.1.5 (not available/installed on node98) includes an option for producing gzipped reads, but is not yet installed on node 98.
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
+  * Create contributing.md (use this as a guide/model: https://github.com/rrwick/Badread/blob/master/CONTRIBUTING.md )
   
 ### Resources
   * https://github.com/nanoporetech/qcat
