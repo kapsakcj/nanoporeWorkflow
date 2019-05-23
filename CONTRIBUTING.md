@@ -21,7 +21,7 @@ nanoporeWorkflow's intended scope is to be a modular workflow that can carry out
 ## Other contribution notes
 
 * Pull requests which improve performance (but do not change nanoporeWorkflow's behaviour) are also welcome!
-* Badread is not using feature branches. I will therefore merge pull requests into the master branch and make a new [release](https://github.com/lskatz/nanoporeWorkflow/releases) when I'm confident that everything works as intended.
+* nanoporeWorkflow is not using feature branches. I will therefore merge pull requests into the master branch and make a new [release](https://github.com/lskatz/nanoporeWorkflow/releases) when I'm confident that everything works as intended.
 * Don't worry about changing nanoporeWorkflow's version number in your pull request. We will bump the version when I make a new release.
 * Adding new dependencies that are not available on SciComp to nanoporeWorkflow is discouraged. Please refrain from doing so unless it is justified.
 
