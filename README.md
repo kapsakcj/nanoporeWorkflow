@@ -1,15 +1,31 @@
 # nanoporeWorkflow
 
-## scripts
+Shell scripts and workflows for working with Nanopore data. Most scripts use `qsub`, the GPU basecalling script does not.
 
-This is a collection of scripts that do one thing at a time.  For example, demultiplexing or basecalling.
+Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](https://github.com/kapsakcj) and potentially YOU!
 
-## workflows
+## TOC
+  * [Scripts](#scripts)
+  * [Workflows](#workflows)
+    * [Guppy GPU basecalling and demultiplexing with qcat](#guppy-gpu-basecalling-and-demultiplexing-with-qcat)
+  * [Contributing](#contributing)
+  * [Future Plans](#future-plans)
+  * [Resources](#resources)
 
-This is a collection of workflows in the form of shell scripts.  They qsub the scripts individually.
-The first positional parameter must be the project folder.  Both input and output go to the project folder.
+## Scripts
 
-### Workflow 1: `run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling and demultiplexing with `qcat`
+This is a collection of scripts that do one thing at a time.  For example, demultiplexing or basecalling [except for `01_basecall-w-gpu.sh` which does both :) ].
+
+## Workflows
+
+This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually (except for `run_basecalling-w-gpu.sh` since the GPUs aren't available through `qsub` yet).
+
+For `workflow.sh` the first positional parameter must be the project folder.  Both input and output go to the project folder.
+
+### Guppy GPU basecalling and demultiplexing with qcat
+
+`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling (& adapter trimming) and demultiplexing (& adapter/barcode trimming) with `qcat`
+
 `run_01_basecall-w-gpu.sh` is the runner/driver script for `01_basecall-w-gpu.sh`
 
 #### Requirements
@@ -18,6 +34,7 @@ The first positional parameter must be the project folder.  Both input and outpu
     * check CPU usage with `htop` and GPU usage with `nvtop` before running the script
   * Must be MinION data, generated with an R9.4.1 flowcell (FLO-MIN106) and ligation sequencing kit (SQK-LSK109)
     * Must be Native Barcodes 1-24 (NBD103/104/114)
+    * We'd like to add flags for other flowcells and sequencing kit when we come across data from those!
 
 #### This workflow does the following:
   * Takes in 3 arguments (in this order):
@@ -61,12 +78,14 @@ $OUTDIR
     ├── logfile-gpu-basecalling_prev.txt # only present if you ran the script more than once
     └── logfile-gpu-basecalling.txt
 ```
- 
-#### Future plans/To-do:
+
+## Contributing
+If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
+
+## Future plans
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
-  * Create contributing.md (use this as a guide/model: https://github.com/rrwick/Badread/blob/master/CONTRIBUTING.md )
   
-### Resources
+## Resources
   * https://github.com/nanoporetech/qcat
   * How to set Guppy parameters (requires Nanopore Community login credentials) https://community.nanoporetech.com/protocols/Guppy-protocol/v/gpb_2003_v1_revl_14dec2018/how-to-configure-guppy-parameters
-  * 
+
