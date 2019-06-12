@@ -79,6 +79,49 @@ $OUTDIR
     └── logfile-gpu-basecalling.txt
 ```
 
+### Post-Guppy GPU basecalling - Assembly with wtdbg2 and polishing with Nanopolish
+
+#### This workflow does the following:
+  * Takes in 2 arguments (in this order):
+    1. `$outdir` - an output directory
+    2. `$FAST5DIR` - a directory containing raw fast5 files
+  * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
+  * Assembles using wtdbg2
+  * Polishes using nanopolish
+
+#### Requirements
+  * Must have run the above script that basecalls reads on a GPU via node98.
+  * Not necessary to be on node98. Any server with the ability to `qsub` will work.
+  * `outdir` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
+    * Recommend `cd`'ing to that directory and use `.` as the `outdir` argument (see USAGE below)
+
+#### USAGE
+```bash
+Usage: 
+    # use your favorite queue, doesn't have to be all.q
+    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh outdir/ fast5dir/
+
+    # example - if you are in your output directory from the gpu-basecalling script
+    cd outdir/
+    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh . ../FAST5/
+
+# OUTPUT TODO CHANGE THIS TREE
+$OUTDIR
+├── demux
+│   ├── barcode06
+│   │   └── barcode06.fastq.gz
+│   ├── barcode10
+│   │   └── barcode10.fastq.gz
+│   ├── barcode12
+│   │   └── barcode12.fastq.gz
+│   ├── none.fastq.gz
+│   └── sequencing_summary.txt
+└── log
+    ├── logfile-gpu-basecalling_prev.txt # only present if you ran the script more than once
+    └── logfile-gpu-basecalling.txt
+```
+
+
 ## Contributing
 If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
 
