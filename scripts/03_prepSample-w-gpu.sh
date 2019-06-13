@@ -1,5 +1,6 @@
 #!/bin/bash
-#$ -o wtdbg2.log
+#$ -o prepSample.log
+#$ -e prepSample.err
 #$ -j y
 #$ -N wtdbg2
 #$ -pe smp 2-16
@@ -20,12 +21,10 @@ source /etc/profile.d/modules.sh
 module purge
 
 NSLOTS=${NSLOTS:=24}
+echo '$NSLOTS is set to:' $NSLOTS
 
 FASTQDIR=$1
 echo '$FASTQDIR is set to:' $FASTQDIR
-
-GENOMELENGTH=5000000 # TODO make this a parameter
-LONGREADCOVERAGE=50  # How much coverage to target with long reads
 
 set -u
 
@@ -52,6 +51,12 @@ echo '$dir is set to:' $dir
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
+# check to see if reads have been compresesd and renamed to all-barcodeXX.fastq.gz
+if [[ -e ${dir}/all-${BARCODE}.fastq.gz ]]; then
+  echo "Reads have been concatenated and renamed by 03_prepSample script already. Exiting...."
+  exit 0
+fi
+
 ### commented out since gzipping is done by previous script
 # Gzip them all
 #uncompressed=$(\ls $dir/*.fastq 2>/dev/null || true)
@@ -75,4 +80,5 @@ zcat ${dir}/all-${BARCODE}.fastq.gz | perl -lne '
   next if($. % 4 != 2);
   print length($_);
 ' | sort -rn | gzip -cf > ${LENGTHS};
+echo "Finished combining reads and counting read lengths."
 
