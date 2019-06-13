@@ -8,6 +8,7 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
   * [Scripts](#scripts)
   * [Workflows](#workflows)
     * [Guppy GPU basecalling and demultiplexing with qcat](#guppy-gpu-basecalling-and-demultiplexing-with-qcat)
+    * [Assembly with wtdbg2 and polishing with Nanopolish](#assembly-with-wtdbg2-and-polishing-with-nanopolish)
   * [Contributing](#contributing)
   * [Future Plans](#future-plans)
   * [Resources](#resources)
@@ -78,6 +79,76 @@ $OUTDIR
     ├── logfile-gpu-basecalling_prev.txt # only present if you ran the script more than once
     └── logfile-gpu-basecalling.txt
 ```
+
+### Assembly with wtdbg2 and polishing with Nanopolish
+
+#### This workflow does the following:
+  * Takes in 2 arguments (in this order):
+    1. `$outdir` - an output directory
+    2. `$FAST5DIR` - a directory containing raw fast5 files
+  * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
+  * Assembles using wtdbg2
+  * Polishes using nanopolish
+
+#### Requirements
+  * Must have previously run the above script that basecalls reads on a GPU via node98.
+  * Not necessary to be on node98. Any server with the ability to `qsub` will work.
+  * `outdir` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
+    * Recommend `cd`'ing to that directory and use `.` as the `outdir` argument (see USAGE below)
+
+#### USAGE
+```bash
+Usage: 
+    # use your favorite queue, doesn't have to be all.q
+    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh outdir/ fast5dir/
+
+    # example - if you are in your output directory from the gpu-basecalling script
+    cd outdir/
+    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh . ../FAST5/
+
+# OUTPUT
+$OUTDIR
+├── demux
+│   ├── barcode12 # only showing one barcode for brevity
+│   │   ├── all-barcode12.fastq.gz
+│   │   ├── all-barcode12.fastq.gz.index
+│   │   ├── all-barcode12.fastq.gz.index.fai
+│   │   ├── all-barcode12.fastq.gz.index.gzi
+│   │   ├── all-barcode12.fastq.gz.index.readdb
+│   │   ├── consensus.ctg1:0-11000.log # A LOT OF THESE, for each chunk of each contig
+│   │   ├── consensus.ctg1:0-11000.vcf.gz # A LOT OF THESE, for each chunk of each contig
+│   │   ├── polished.fasta
+│   │   ├── rangesCounter.txt
+│   │   ├── readlengths.txt.gz
+│   │   ├── reads.bam
+│   │   ├── reads.bam.bai
+│   │   ├── unpolished.fasta
+│   │   ├── unpolished.fasta.fai
+│   │   ├── wtdbg2.1.dot.gz
+│   │   ├── wtdbg2.1.nodes
+│   │   ├── wtdbg2.1.reads
+│   │   ├── wtdbg2.2.dot.gz
+│   │   ├── wtdbg2.3.dot.gz
+│   │   ├── wtdbg2.alignments.gz
+│   │   ├── wtdbg2.binkmer
+│   │   ├── wtdbg2.closed_bins
+│   │   ├── wtdbg2.clps
+│   │   ├── wtdbg2.ctg.dot.gz
+│   │   ├── wtdbg2.ctg.lay.gz
+│   │   ├── wtdbg2.events
+│   │   ├── wtdbg2.frg.dot.gz
+│   │   ├── wtdbg2.frg.nodes
+│   │   └── wtdbg2.kmerdep
+└── log
+    ├── prepSample-35d239ad-f2c3-4472-b810-76f56ad43c1d.log # one of each of these logs for each barcode
+    ├── assemble-f73c45e5-ceb4-4aae-bc13-c9923adfe63a.log
+    └── polish-c1888109-727b-4a99-bc92-69c12e97222e.log
+```
+#### Notes on assembly and polishing workflow
+  * It will check for the following files, to determine if it should skip any of the steps. Helps if one part doesn't run correctly and you don't want to repeat a certain step, e.g. re-assembling.
+    * `03_preppSample-w-gpu.sh` looks for `./demux/barcodeXX/all-barcodeXX.fastq.gz` 
+    * `05_assemble.sh` looks for `./demux/barcodeXX/unpolished.fasta`
+    * `07_nanopolish.sh` looks for `./demux/barcodeXX/polished.fasta`
 
 ## Contributing
 If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
