@@ -102,8 +102,8 @@ else
                    -x "cuda:0 cuda:1" \
                    -m /opt/ont/guppy/data/template_r9.4.1_450bps_hac.jsn \
                    -c /opt/ont/guppy/data/dna_r9.4.1_450bps_hac.cfg \
-                   --chunk_size 1100 \
-                   --gpu_runners_per_device 7 \
+                   --chunk_size 1000 \
+                   --gpu_runners_per_device 2 \
                    --chunks_per_runner 1000 \
                    --chunks_per_caller 10000 \
                    --overlap 50 \
