@@ -11,12 +11,12 @@ source /etc/profile.d/modules.sh
 module purge
 
 NSLOTS=${NSLOTS:=48}
-echo '$NSLOTS set to:' $NSLOTS
+#echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
-echo '$INDIR set to:' $INDIR
+#echo '$INDIR set to:' $INDIR
 FAST5DIR=$2
-echo '$FAST5DIR set to:' $FAST5DIR
+#echo '$FAST5DIR set to:' $FAST5DIR
 
 set -u
 
@@ -46,7 +46,7 @@ echo '$dir is set to:' ${dir}
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
-FASTQ="$dir/all-${BARCODE}.fastq.gz"
+FASTQ="$dir/all.fastq.gz"
 
 # check to see if assembly has been polished, skip if so
 if [[ -e ${dir}/polished.fasta ]]; then
@@ -66,7 +66,7 @@ fi
 # Map the reads to get a bam
 if [ ! -e "$dir/.mapped-reads" ]; then
   echo "mapping reads to the unpolished assembly with minimap2..."
-  minimap2 -a -x map-ont -t $NSLOTS ${dir}/unpolished.fasta ${dir}/all-${BARCODE}.fastq.gz | \
+  minimap2 -a -x map-ont -t $NSLOTS ${dir}/unpolished.fasta ${dir}/all.fastq.gz | \
     samtools view -bS -T ${dir}/unpolished.fasta > ${dir}/unsorted.bam
   samtools sort -l 1 --threads $(($NSLOTS - 1)) ${dir}/unsorted.bam > ${dir}/reads.bam
   samtools index ${dir}/reads.bam
@@ -103,7 +103,7 @@ echo "$RANGES" | xargs -P $NSLOTS -n 1 bash -c '
   fi
 
   echo "Nanopolish variants on $window ($counter/$numRanges)"
-  nanopolish variants --consensus -r $dir/all-${BARCODE}.fastq.gz -b $dir/reads.bam -g $dir/unpolished.fasta -t 1 --min-candidate-frequency 0.1 --min-candidate-depth 20 -w "$window" --max-haplotypes=1000 --ploidy 1 > $dir/consensus.$window.vcf 2>$dir/consensus.$window.log;
+  nanopolish variants --consensus -r $dir/all.fastq.gz -b $dir/reads.bam -g $dir/unpolished.fasta -t 1 --min-candidate-frequency 0.1 --min-candidate-depth 20 -w "$window" --max-haplotypes=1000 --ploidy 1 > $dir/consensus.$window.vcf 2>$dir/consensus.$window.log;
 
   # Record that we finished these results
   touch $dir/.$window-vcf
