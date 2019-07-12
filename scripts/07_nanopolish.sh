@@ -46,7 +46,7 @@ echo '$dir is set to:' ${dir}
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
-FASTQ="$dir/all-${BARCODE}.fastq.gz"
+FASTQ="$dir/all.fastq.gz"
 
 # check to see if assembly has been polished, skip if so
 if [[ -e ${dir}/polished.fasta ]]; then
