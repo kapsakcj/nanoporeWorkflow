@@ -6,9 +6,12 @@ before_script:
   - apt-get update
   - apt-get install bats
 
+
 test1:
-  - bats t/01_basecall.sh
-  - bats t/03_prepSample.sh
-  - bats t/05_assemble.sh
-  - bats t/07_nanopolish.sh
+  stage: test
+  script:
+    - bats t/01_basecall.sh
+    - bats t/03_prepSample.sh
+    - bats t/05_assemble.sh
+    - bats t/07_nanopolish.sh
 
