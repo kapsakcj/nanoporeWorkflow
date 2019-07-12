@@ -6,7 +6,11 @@ addons:
     - sourceline: 'ppa:duggan/bats'
     packages:
     - bats
-    - bc
+    - realpath
+    - minimap2
+    - nanopolish
+    - samtools
+    - tabix
 script: 
   - bats t/01_basecall.sh
   - bats t/03_prepSample.sh
