@@ -6,7 +6,7 @@ thisDir=$BATS_TEST_DIRNAME
 scriptsDir=$(realpath "$thisDir/../scripts")
 export NSLOTS=2 # slots given to us by travis
 
-projectDir=$thisDir/vanilla.project.bak/barcode12
+projectDir=$thisDir/vanilla.project/barcode12
 
 @test "Usage statement" {
   run bash $scriptsDir/07_nanopolish.sh
@@ -26,7 +26,7 @@ projectDir=$thisDir/vanilla.project.bak/barcode12
     [ "$status" -eq 0 ]
   fi
 
-  hashsum=$(md5sum vanilla.project.bak/barcode12/polished.fasta | cut -f 1 -d ' ')
-  [ "$hashsum" == "c9f56cb11b5e6234a5322a01acf21ae8" ]
+  hashsum=$(grep ">" vanilla.project.bak/barcode12/polished.fasta | md5sum | cut -f 1 -d ' ')
+  [ "$hashsum" == "67017b71e8f18cd56b15d9970c2cf620" ]
 }
 

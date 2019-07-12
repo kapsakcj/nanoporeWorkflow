@@ -28,7 +28,7 @@ projectDir=$thisDir/vanilla.project/barcode12
     [ "$status" -eq 0 ]
   fi
 
-  hashsum=$(md5sum $projectDir/unpolished.fasta | cut -f 1 -d ' ')
-  [ "$hashsum" == "d928e8159ab1591569e6c873662635e2" ]
+  hashsum=$(grep ">" $projectDir/unpolished.fasta | md5sum | cut -f 1 -d ' ')
+  [ "$hashsum" == "b75ce4e49cf6618077dfab6664d41359" ]
 }
 
