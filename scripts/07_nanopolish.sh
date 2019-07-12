@@ -11,12 +11,12 @@ source /etc/profile.d/modules.sh
 module purge
 
 NSLOTS=${NSLOTS:=48}
-echo '$NSLOTS set to:' $NSLOTS
+#echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
-echo '$INDIR set to:' $INDIR
+#echo '$INDIR set to:' $INDIR
 FAST5DIR=$2
-echo '$FAST5DIR set to:' $FAST5DIR
+#echo '$FAST5DIR set to:' $FAST5DIR
 
 set -u
 

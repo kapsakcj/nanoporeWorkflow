@@ -21,10 +21,10 @@ source /etc/profile.d/modules.sh
 module purge
 
 NSLOTS=${NSLOTS:=1}
-echo '$NSLOTS set to:' $NSLOTS
+#echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
-echo '$INDIR is set to:' $INDIR
+#echo '$INDIR is set to:' $INDIR
 
 GENOMELENGTH=5000000 # TODO make this a parameter
 LONGREADCOVERAGE=120  # How much coverage to target with long reads
@@ -32,7 +32,6 @@ LONGREADCOVERAGE=120  # How much coverage to target with long reads
 set -u
 
 if [ "$INDIR" == "" ]; then
-    echo ""
     echo "Usage: $0 barcode-fastq-dir/"
     echo ""
     exit 1;
