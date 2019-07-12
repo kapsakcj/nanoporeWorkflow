@@ -1,5 +1,7 @@
 sudo: false
 language: bash
+before_install:
+  - git lfs pull
 addons:
   apt:
     sources:
