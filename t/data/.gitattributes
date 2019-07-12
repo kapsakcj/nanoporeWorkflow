@@ -1,0 +1,1 @@
+SalmonellaMontevideo.FAST5.tar.xz filter=lfs diff=lfs merge=lfs -text
