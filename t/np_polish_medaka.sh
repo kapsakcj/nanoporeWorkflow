@@ -26,17 +26,8 @@ projectDir=$thisDir/vanilla.project/barcode12
     [ "$status" -eq 0 ]
   fi
 
+  export RANDOM=42
   hashsum=$(grep ">" $projectDir/polished.fasta | md5sum | cut -f 1 -d ' ')
-  [[   "$hashsum" == "67017b71e8f18cd56b15d9970c2cf620" ]] || \
-    [[ "$hashsum" == "8dba7783ba37625541ef7cb92c083bb0" ]]
-
-  # >ctg1:7.0-64712.0
-  # >ctg2:1.0-27968.0
-  # >ctg3:40.0-16743.0
-
-  # >ctg1
-  # >ctg2
-  # >ctg3
-  # >ctg4
+  [[ "$hashsum" == "4a829477a7e2f21c9cc7a8077205c875" ]]
 }
 
