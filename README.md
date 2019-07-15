@@ -17,6 +17,17 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
 
 This is a collection of scripts that do one thing at a time.  For example, demultiplexing or basecalling [except for `01_basecall-w-gpu.sh` which does both :) ].
 
+Each script should start with `np_` to indicate the nanopore workflow. Then,
+each script should be named after one of these namespaces, to help indicate which stage of the process.
+Separate each namespace with an underscore. Namespaces may not have underscores
+in their names (e.g., a namespace of de_multiplex would be invalid.).
+
+* basecalling: `basecall` (can be combined with basecalling: `basecall-demux`)
+* demultiplexing: `demux_` (can be combined with basecalling: `basecall-demux`)
+* preparing the data in each barcode: `prepSample_`
+* assembly: `assemble_`
+* polishing: `polish_`
+
 ## Workflows
 
 This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually (except for `run_basecalling-w-gpu.sh` since the GPUs aren't available through `qsub` yet).
