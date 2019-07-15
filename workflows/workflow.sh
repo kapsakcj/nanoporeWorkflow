@@ -58,5 +58,4 @@ for barcodeDir in $OUTDIR/barcode[0-9]*; do
   jobName4="polish-$barcodeuuid"
   qsub -hold_jid $jobName3 -pe smp 1-$NSLOTS -N $jobName4 -cwd -o log/$jobName4.log -j y \
     $thisDir/../scripts/np_polish_medaka.sh $barcodeDir $FAST5DIR
-
 done
