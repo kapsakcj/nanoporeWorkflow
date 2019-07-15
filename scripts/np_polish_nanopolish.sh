@@ -83,18 +83,18 @@ RANGES=$(python $(which nanopolish_makerange.py) $dir/unpolished.fasta --overlap
 export numRanges=$(wc -l <<< "$RANGES")
 echo "RANGES: $(tr '\n' ' ' <<< "$RANGES")"
 echo "Calling variants on $numRanges ranges in the assembly. Progress bar will show one dot per range skipped due to previous results."
-echo "0" > $dir/rangesCounter.txt
+#echo "0" > $dir/rangesCounter.txt
 echo "$RANGES" | xargs -P $NSLOTS -n 1 bash -c '
   window="$0";
   dir="'$dir'";
   BARCODE="'$BARCODE'";
 
   # Progress counter
-  lockfile -l 3 $dir/rangesCounter.txt.lock
-  counter=`cat $dir/rangesCounter.txt`
-  counter=$(($counter + 1))
-  echo "$counter" > $dir/rangesCounter.txt
-  rm -f $dir/rangesCounter.txt.lock
+  #lockfile -l 3 $dir/rangesCounter.txt.lock
+  #counter=`cat $dir/rangesCounter.txt`
+  #counter=$(($counter + 1))
+  #echo "$counter" > $dir/rangesCounter.txt
+  #rm -f $dir/rangesCounter.txt.lock
 
   # Do not redo results
   if [ -e "$dir/.$window-vcf" ]; then
