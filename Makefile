@@ -1,23 +1,23 @@
 #!/usr/bin/env make
 
 # Manual makefile
+# Major targets are: install, test, clean
 
 .DELETE_ON_ERROR:
 
 .default: install
 
-install: t/data/SalmonellaMontevideo.FAST5.tar.xz
+install: t/.data-uncompress.done
 
 # Make all large files depend on git-lfs
-t/data/.git-lfs-finished:
+t/data/.git-lfs.done:
 	git lfs pull origin
 	touch $@
 
-# The source data file for all tests
-t/data/SalmonellaMontevideo.FAST5.tar.xz: t/data/.git-lfs-finished
-	tar --directory t/data -Jxvf $@
-	# truncate the file to free up space, but also leave it compatible with the xz format
-	echo -n "" | xz -c > $@ 
+# Uncompress large file(s)
+t/.data-uncompress.done: t/data/.git-lfs.done t/data/SalmonellaMontevideo.FAST5.tar.xz
+	tar --directory t/data -Jxvf t/data/SalmonellaMontevideo.FAST5.tar.xz
+	touch $@
 
 # Wrapper for cleaning all the things
 clean: clean-large-files clean-tests
@@ -26,7 +26,8 @@ clean: clean-large-files clean-tests
 clean-large-files:
 	rm -vf t/data/SalmonellaMontevideo.FAST5.tar.xz
 	rm -rvf t/data/SalmonellaMontevideo.FAST5
-	rm t/data/.git-lfs-finished
+	rm -vf t/.data-uncompress.done
+	rm -vf t/data/.git-lfs.done
 
 # Clean test results
 clean-tests:
@@ -36,6 +37,7 @@ clean-tests:
 # For any test, run it with bats and then touch the file
 t/%.done:
 	exe=t/$$(basename $@ .done) && \
+		echo bats $$exe &&\
 		bats $$exe
 	touch $@
 
