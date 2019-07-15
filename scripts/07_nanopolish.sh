@@ -10,7 +10,7 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=48}
+NSLOTS=${NSLOTS:=24}
 #echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
