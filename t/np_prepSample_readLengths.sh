@@ -9,7 +9,7 @@ scriptsDir=$(realpath "$thisDir/../scripts")
 projectDir=$thisDir/vanilla.project/barcode12
 
 @test "Usage statement" {
-  run bash $scriptsDir/03_prepSample.sh
+  run bash $scriptsDir/np_prepSample_readLengths.sh
   [ "$status" -eq 1 ] # usage exits with 1
   [ "$output" != "" ]
   [ ${output:0:6} == "Usage:" ] # First five characters of the usage statement is "Usage: "
@@ -22,7 +22,7 @@ projectDir=$thisDir/vanilla.project/barcode12
   [ $(find $projectDir -maxdepth 1 -type f -name '*.fastq' | wc -l) -gt 0 ]
   [ -e "$projectDir/sequencing_summary.txt" ]
 
-  run bash $scriptsDir/03_prepSample.sh $projectDir
+  run bash $scriptsDir/np_prepSample_readLengths.sh $projectDir
   [ "$status" -eq 0 ]
   [ -f "$projectDir/all.fastq.gz" ]
   [ -f "$projectDir/readlengths.txt.gz" ]
