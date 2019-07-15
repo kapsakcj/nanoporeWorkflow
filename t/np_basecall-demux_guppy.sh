@@ -7,7 +7,7 @@ thisDir=$BATS_TEST_DIRNAME
 scriptsDir=$(realpath "$thisDir/../scripts")
 
 @test "Usage statement" {
-  run bash $scriptsDir/01_basecall.sh
+  run bash $scriptsDir/np_basecall-demux_guppy.sh
   [ "$status" -eq 1 ] # usage exits with 1
   [ "$output" != "" ]
   [ ${output:0:6} == "Usage:" ] # First five characters of the usage statement is "Usage: "
@@ -15,7 +15,7 @@ scriptsDir=$(realpath "$thisDir/../scripts")
 
 @test "Base calling and demultiplexing with guppy" {
   if [ ! -e $thisDir/vanilla.project ]; then
-    run bash $scriptsDir/01_basecall.sh $thisDir/vanilla.project $thisDir/data/SalmonellaMontevideo.FAST5
+    run bash $scriptsDir/np_basecall-demux_guppy.sh $thisDir/vanilla.project $thisDir/data/SalmonellaMontevideo.FAST5
     [ "$status" -eq 0 ] # usage exits with 0
   fi
 

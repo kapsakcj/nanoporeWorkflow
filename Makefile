@@ -41,5 +41,5 @@ t/%.done:
 		bats $$exe
 	touch $@
 
-test: t/np_basecall-demux_guppy.sh t/np_prepSample_readLengths.sh t/np_assemble_wtdbg2.sh t/np_polish_nanopolish.sh
+test: t/np_basecall-demux_guppy.sh.done t/np_prepSample_readLengths.sh.done t/np_assemble_wtdbg2.sh.done t/np_polish_medaka.sh.done
 

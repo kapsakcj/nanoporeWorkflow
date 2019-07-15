@@ -9,7 +9,7 @@ scriptsDir=$(realpath "$thisDir/../scripts")
 projectDir=$thisDir/vanilla.project/barcode12
 
 @test "Usage statement" {
-  run bash $scriptsDir/07_nanopolish.sh
+  run bash $scriptsDir/np_polish_nanopolish.sh
   [ "$status" -eq 1 ] # usage exits with 1
   [ "$output" != "" ]
   [ ${output:0:6} == "Usage:" ] # First five characters of the usage statement is "Usage: "
@@ -22,7 +22,7 @@ projectDir=$thisDir/vanilla.project/barcode12
 @test "polishing with nanopolish" {
 
   if [ ! -f "$projectDir/polished.fasta" ]; then
-    run bash $scriptsDir/07_nanopolish.sh $projectDir $thisDir/data/SalmonellaMontevideo.FAST5
+    run bash $scriptsDir/np_polish_nanopolish.sh $projectDir $thisDir/data/SalmonellaMontevideo.FAST5
     [ "$status" -eq 0 ]
   fi
 
