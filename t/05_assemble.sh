@@ -2,9 +2,9 @@
 
 # BATS https://github.com/sstephenson/bats
 
+load environment
 thisDir=$BATS_TEST_DIRNAME
 scriptsDir=$(realpath "$thisDir/../scripts")
-export NSLOTS=2 # slots given to us by travis
 
 projectDir=$thisDir/vanilla.project/barcode12
 
