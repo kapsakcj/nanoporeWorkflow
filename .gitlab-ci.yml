@@ -1,0 +1,17 @@
+# This line might be optional if we are not using Docker
+image: busybox:latest
+
+before_script:
+  - add-apt-repository ppa:duggan/bats
+  - apt-get update
+  - apt-get install bats
+
+
+test1:
+  stage: test
+  script:
+    - bats t/01_basecall.sh
+    - bats t/03_prepSample.sh
+    - bats t/05_assemble.sh
+    - bats t/07_nanopolish.sh
+

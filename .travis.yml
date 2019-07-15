@@ -1,10 +1,20 @@
 sudo: false
 language: bash
+before_install:
+  - git lfs pull
 addons:
   apt:
     sources:
     - sourceline: 'ppa:duggan/bats'
     packages:
     - bats
-    - bc
-script: bats /path/to/bats
+    - realpath
+    - minimap2
+    - nanopolish
+    - samtools
+    - tabix
+script: 
+  - bats t/01_basecall.sh
+  - bats t/03_prepSample.sh
+  - bats t/05_assemble.sh
+  - bats t/07_nanopolish.sh

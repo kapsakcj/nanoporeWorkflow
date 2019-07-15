@@ -10,7 +10,7 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=48}
+NSLOTS=${NSLOTS:=24}
 #echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
@@ -66,7 +66,7 @@ fi
 # Map the reads to get a bam
 if [ ! -e "$dir/.mapped-reads" ]; then
   echo "mapping reads to the unpolished assembly with minimap2..."
-  minimap2 -a -x map-ont -t $NSLOTS ${dir}/unpolished.fasta ${dir}/all-${BARCODE}.fastq.gz | \
+  minimap2 -a -x map-ont -t $NSLOTS ${dir}/unpolished.fasta ${dir}/all.fastq.gz | \
     samtools view -bS -T ${dir}/unpolished.fasta > ${dir}/unsorted.bam
   samtools sort -l 1 --threads $(($NSLOTS - 1)) ${dir}/unsorted.bam > ${dir}/reads.bam
   samtools index ${dir}/reads.bam
@@ -83,18 +83,18 @@ RANGES=$(python $(which nanopolish_makerange.py) $dir/unpolished.fasta --overlap
 export numRanges=$(wc -l <<< "$RANGES")
 echo "RANGES: $(tr '\n' ' ' <<< "$RANGES")"
 echo "Calling variants on $numRanges ranges in the assembly. Progress bar will show one dot per range skipped due to previous results."
-echo "0" > $dir/rangesCounter.txt
+#echo "0" > $dir/rangesCounter.txt
 echo "$RANGES" | xargs -P $NSLOTS -n 1 bash -c '
   window="$0";
   dir="'$dir'";
   BARCODE="'$BARCODE'";
 
   # Progress counter
-  lockfile -l 3 $dir/rangesCounter.txt.lock
-  counter=`cat $dir/rangesCounter.txt`
-  counter=$(($counter + 1))
-  echo "$counter" > $dir/rangesCounter.txt
-  rm -f $dir/rangesCounter.txt.lock
+  #lockfile -l 3 $dir/rangesCounter.txt.lock
+  #counter=`cat $dir/rangesCounter.txt`
+  #counter=$(($counter + 1))
+  #echo "$counter" > $dir/rangesCounter.txt
+  #rm -f $dir/rangesCounter.txt.lock
 
   # Do not redo results
   if [ -e "$dir/.$window-vcf" ]; then
@@ -103,7 +103,7 @@ echo "$RANGES" | xargs -P $NSLOTS -n 1 bash -c '
   fi
 
   echo "Nanopolish variants on $window ($counter/$numRanges)"
-  nanopolish variants --consensus -r $dir/all-${BARCODE}.fastq.gz -b $dir/reads.bam -g $dir/unpolished.fasta -t 1 --min-candidate-frequency 0.1 --min-candidate-depth 20 -w "$window" --max-haplotypes=1000 --ploidy 1 > $dir/consensus.$window.vcf 2>$dir/consensus.$window.log;
+  nanopolish variants --consensus -r $dir/all.fastq.gz -b $dir/reads.bam -g $dir/unpolished.fasta -t 1 --min-candidate-frequency 0.1 --min-candidate-depth 20 -w "$window" --max-haplotypes=1000 --ploidy 1 > $dir/consensus.$window.vcf 2>$dir/consensus.$window.log;
 
   # Record that we finished these results
   touch $dir/.$window-vcf
