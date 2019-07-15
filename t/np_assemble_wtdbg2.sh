@@ -28,10 +28,11 @@ projectDir=$thisDir/vanilla.project/barcode12
     [ "$status" -eq 0 ]
   fi
 
-  RANDOM=42 # set seed
+  export RANDOM=42 # set seed
   hashsum=$(grep ">" $projectDir/unpolished.fasta | md5sum | cut -f 1 -d ' ')
-  [[   "$hashsum" == "b75ce4e49cf6618077dfab6664d41359" ]] || \
-    [[ "$hashsum" == "be4533790362104fa23fd7a85e09e9a4" ]]
+  [[ "$hashsum" == "40664056e042de0a2bbd2a52656a809a" ]]
+  #[[   "$hashsum" == "b75ce4e49cf6618077dfab6664d41359" ]] || \
+  #  [[ "$hashsum" == "be4533790362104fa23fd7a85e09e9a4" ]]
 
   # contig names
   # >ctg1 len=64596
