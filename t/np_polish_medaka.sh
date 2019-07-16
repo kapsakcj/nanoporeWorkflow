@@ -27,7 +27,29 @@ projectDir=$thisDir/vanilla.project/barcode12
     [ "$status" -eq 0 ]
   fi
 
-  hashsum=$(grep ">" $projectDir/polished.fasta | md5sum | cut -f 1 -d ' ')
-  [[ "$hashsum" == "169f7a848638f4ce18fbe7a58c30eb38" ]]
+  # The test will be whether the stochastic assembly matches ours enough
+  blastn -query $projectDir/polished.fasta -db $thisDir/data/polished.fasta -outfmt 6 > $projectDir/polished.blast.tsv
+
+  sort -k1,2 -k3,3nr $projectDir/polished.blast.tsv |\
+    perl -lane '
+      $F[0] = substr($F[0],0,4);
+      next if($F[0] ne $F[1]);
+
+      $score{$F[0]} += $F[11];
+
+      END{
+        for my $contig(sort keys(%score)){
+          print join("\t", $contig, $score{$contig});
+        }
+      }
+    ' > $projectDir/polished.scores.tsv
+
+  score1=$(grep ctg1 $projectDir/polished.scores.tsv | cut -f 2)
+  [ "$score1" -gt 100000 ]
+  score2=$(grep ctg2 $projectDir/polished.scores.tsv | cut -f 2)
+  [ "$score2" -gt 40000  ]
+  score3=$(grep ctg3 $projectDir/polished.scores.tsv | cut -f 2)
+  [ "$score3" -gt 20000  ]
+
 }
 
