@@ -1,6 +1,7 @@
 t/vanilla.project
 t/data/.uncompressed
-t/data/SalmonellaMontevideo.FAST5
+t/data/SalmonellaLitchfield.FAST5
+t/data/*.fasta
 t/*.done
 t/data/*.done
 
