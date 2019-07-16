@@ -15,8 +15,9 @@ t/data/.git-lfs.done:
 	touch $@
 
 # Uncompress large file(s)
-t/.data-uncompress.done: t/data/.git-lfs.done t/data/SalmonellaMontevideo.FAST5.tar.xz
-	tar --directory t/data -Jxvf t/data/SalmonellaMontevideo.FAST5.tar.xz
+t/.data-uncompress.done: t/data/.git-lfs.done t/data/SalmonellaLitchfield.FAST5.tar.xz
+	tar --directory t/data -Jxvf t/data/SalmonellaLitchfield.FAST5.tar.xz
+	gunzip -vf t/data/*.gz
 	touch $@
 
 # Wrapper for cleaning all the things
@@ -24,8 +25,10 @@ clean: clean-large-files clean-tests
 
 # Clean only the large files
 clean-large-files:
-	rm -vf t/data/SalmonellaMontevideo.FAST5.tar.xz
-	rm -rvf t/data/SalmonellaMontevideo.FAST5
+	rm -vf t/data/SalmonellaLitchfield.FAST5.tar.xz
+	rm -rvf t/data/SalmonellaLitchfield.FAST5
+	rm -vf t/data/*.gz
+	rm -vf t/data/*.fasta
 	rm -vf t/.data-uncompress.done
 	rm -vf t/data/.git-lfs.done
 
