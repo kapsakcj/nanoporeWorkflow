@@ -76,5 +76,7 @@ wtdbg2 -t $NSLOTS -i ${dir}/all.fastq.gz -fo ${dir}/wtdbg2 -p 19 -AS 2 -s 0.05 -
 
 # Generate the actual assembly using wtpoa-cns
 echo "Generating consensus with wtpoa-cns...."
-wtpoa-cns -t 16 -i $dir/wtdbg2.ctg.lay.gz -o $dir/unpolished.fasta 
+wtpoa-cns -t 16 -i $dir/wtdbg2.ctg.lay.gz -o $dir/unpolished.fasta.tmp
+mv $dir/unpolished.fasta.tmp $dir/unpolished.fasta
+
 
