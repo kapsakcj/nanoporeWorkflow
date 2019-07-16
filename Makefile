@@ -19,7 +19,7 @@ t/.data-uncompress.done: t/data/.git-lfs.done t/data/SalmonellaLitchfield.FAST5.
 	tar --directory t/data -Jxvf t/data/SalmonellaLitchfield.FAST5.tar.xz
 	zcat t/data/polished.fasta.gz > t/data/polished.fasta
 	zcat t/data/unpolished.fasta.gz > t/data/unpolished.fasta
-	makeblastdb -in data/polished.fasta -dbtype nucl
+	makeblastdb -in t/data/polished.fasta -dbtype nucl
 	touch $@
 
 # Wrapper for cleaning all the things
