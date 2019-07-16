@@ -5,11 +5,14 @@ Before running unit tests, please edit `environment.bash`.
 
 To run any of the tests, run `make test`.
 
-## 01_basecall.sh
+## t/np_assemble_wtdbg2.sh
 
-## 03_prepSample.sh
+## t/np_polish_medaka.sh
 
-## 05_assemble.sh
+## t/np_prepSample_readLengths.sh
 
-## 07_nanopolish.sh
+## t/np_basecall-demux_guppy.sh
+
+## t/np_polish_nanopolish.sh
+
 
