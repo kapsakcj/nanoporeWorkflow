@@ -21,13 +21,13 @@ projectDir=$thisDir/vanilla.project/barcode12
 
 @test "polishing with medaka" {
 
+  export RANDOM=42
   if [ ! -f "$projectDir/polished.fasta" ]; then
     run bash $scriptsDir/np_polish_medaka.sh $projectDir
     [ "$status" -eq 0 ]
   fi
 
-  export RANDOM=42
   hashsum=$(grep ">" $projectDir/polished.fasta | md5sum | cut -f 1 -d ' ')
-  [[ "$hashsum" == "4a829477a7e2f21c9cc7a8077205c875" ]]
+  [[ "$hashsum" == "169f7a848638f4ce18fbe7a58c30eb38" ]]
 }
 
