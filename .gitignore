@@ -2,6 +2,7 @@ t/vanilla.project
 t/data/.uncompressed
 t/data/SalmonellaLitchfield.FAST5
 t/data/*.fasta
+t/data/*.fasta.*
 t/*.done
 t/data/*.done
 
