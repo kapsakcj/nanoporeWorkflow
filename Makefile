@@ -36,7 +36,7 @@ clean-large-files:
 
 # Clean test results
 clean-tests:
-	rm t/*.done
+	rm -f t/*.done
 	rm -rvf t/vanilla.project
 
 # For any test, run it with bats and then touch the file
