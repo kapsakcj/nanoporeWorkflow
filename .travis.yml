@@ -13,6 +13,7 @@ addons:
     - nanopolish
     - samtools
     - tabix
+    - ncbi-blast+
 script: 
   - bats t/np_basecall-demux_guppy.sh
   - bats t/np_prepSample_readLengths.sh
