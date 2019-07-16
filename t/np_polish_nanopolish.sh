@@ -22,7 +22,7 @@ projectDir=$thisDir/vanilla.project/barcode12
 @test "polishing with nanopolish" {
 
   if [ ! -f "$projectDir/polished.fasta" ]; then
-    run bash $scriptsDir/np_polish_nanopolish.sh $projectDir $thisDir/data/SalmonellaMontevideo.FAST5
+    run bash $scriptsDir/np_polish_nanopolish.sh $projectDir $thisDir/data/SalmonellaLitchfield.FAST5
     [ "$status" -eq 0 ]
   fi
 
