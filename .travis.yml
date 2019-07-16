@@ -14,7 +14,8 @@ addons:
     - samtools
     - tabix
 script: 
-  - bats t/01_basecall.sh
-  - bats t/03_prepSample.sh
-  - bats t/05_assemble.sh
-  - bats t/07_nanopolish.sh
+  - bats t/np_basecall-demux_guppy.sh
+  - bats t/np_prepSample_readLengths.sh
+  - bats t/np_assemble_wtdbg2.sh
+  - bats t/np_polish_medaka.sh
+
