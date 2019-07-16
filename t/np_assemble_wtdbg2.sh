@@ -24,26 +24,13 @@ projectDir=$thisDir/vanilla.project/barcode12
 @test "Assembly with wtdbg2" {
 
   if [ ! -f "$projectDir/unpolished.fasta" ]; then
+    export RANDOM=42 # set seed
     run bash $scriptsDir/np_assemble_wtdbg2.sh $projectDir
     [ "$status" -eq 0 ]
   fi
 
-  export RANDOM=42 # set seed
   hashsum=$(grep ">" $projectDir/unpolished.fasta | md5sum | cut -f 1 -d ' ')
-  [[ "$hashsum" == "40664056e042de0a2bbd2a52656a809a" ]]
-  #[[   "$hashsum" == "b75ce4e49cf6618077dfab6664d41359" ]] || \
-  #  [[ "$hashsum" == "be4533790362104fa23fd7a85e09e9a4" ]]
-
-  # contig names
-  # >ctg1 len=64596
-  # >ctg2 len=28015
-  # >ctg3 len=16744
-  # >ctg4 len=10897
-  # OR
-  # >ctg1 len=64712
-  # >ctg2 len=28005
-  # >ctg3 len=16743
-
+  [[ "$hashsum" == "8fa2a588c1b9a7b697de888dbde1723e" ]]
 
 }
 
