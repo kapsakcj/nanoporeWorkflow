@@ -15,7 +15,7 @@ scriptsDir=$(realpath "$thisDir/../scripts")
 
 @test "Base calling and demultiplexing with guppy" {
   if [ ! -e $thisDir/vanilla.project ]; then
-    run bash $scriptsDir/np_basecall-demux_guppy.sh $thisDir/vanilla.project $thisDir/data/SalmonellaMontevideo.FAST5
+    run bash $scriptsDir/np_basecall-demux_guppy.sh $thisDir/vanilla.project $thisDir/data/SalmonellaLitchfield.FAST5
     [ "$status" -eq 0 ] # usage exits with 0
   fi
 
