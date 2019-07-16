@@ -6,6 +6,7 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:duggan/bats'
+    - sourceline: 'deb http://mirror.oxfordnanoportal.com/apt xenial-stable non-free'
     packages:
     - bats
     - realpath
@@ -14,6 +15,12 @@ addons:
     - samtools
     - tabix
     - ncbi-blast+
+    - ont-guppy-cpu
+  homebrew:
+    taps: brewsci/bio
+    casks:
+      - wtdbg2
+
 script: 
   - bats t/np_basecall-demux_guppy.sh
   - bats t/np_prepSample_readLengths.sh
