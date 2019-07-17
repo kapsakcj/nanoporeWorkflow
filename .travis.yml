@@ -14,7 +14,6 @@ addons:
     packages:
     - bats
     - realpath
-    - nanopolish
     - samtools
     - tabix
     - ncbi-blast+
