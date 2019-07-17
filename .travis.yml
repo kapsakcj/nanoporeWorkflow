@@ -7,6 +7,7 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:duggan/bats'
+    #- sourceline: 'deb http://mirror.oxfordnanoportal.com/apt xenial-stable non-free'
     packages:
     - bats
     - realpath
