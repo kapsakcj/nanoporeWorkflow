@@ -1,12 +1,12 @@
 sudo: false
 language: bash
 before_install:
-  - git lfs pull
+  - export PATH=$PATH:$HOME/.local/bin
+  - pip install chiron --user
 addons:
   apt:
     sources:
     - sourceline: 'ppa:duggan/bats'
-    #- sourceline: 'deb http://mirror.oxfordnanoportal.com/apt xenial-stable non-free'
     packages:
     - bats
     - realpath
@@ -15,15 +15,15 @@ addons:
     - samtools
     - tabix
     - ncbi-blast+
-      #- ont-guppy-cpu
   homebrew:
     taps: brewsci/bio
     casks:
       - wtdbg2
 
 script: 
-  - bats t/np_basecall-demux_guppy.sh
-  - bats t/np_prepSample_readLengths.sh
-  - bats t/np_assemble_wtdbg2.sh
-  - bats t/np_polish_medaka.sh
+  - make
+  - make t/np_basecall-demux_guppy.sh.done
+  - make t/np_prepSample_readLengths.sh.done
+  - make t/np_assemble_wtdbg2.sh.done
+  - make t/np_polish_medaka.sh.done
 
