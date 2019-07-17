@@ -1,6 +1,9 @@
 sudo: false
 language: bash
 before_install:
+  - curl -L https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17_x64-linux.tar.bz2 | tar -jxvf - ./minimap2-2.17_x64-linux/minimap2
+  - export PATH=$PATH:./nanopolish
+  - git clone --recursive https://github.com/jts/nanopolish.git && cd nanopolish && git checkout v0.11.1 && make && cd -
   - wget -q https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_2.2.2-1~xenial_amd64.deb
   - dpkg -i --ignore-depends=nvidia-384,libcuda1-384 ont_guppy_2.2.2-2~xenial_amd64.deb
 addons:
@@ -11,12 +14,10 @@ addons:
     packages:
     - bats
     - realpath
-    - minimap2
     - nanopolish
     - samtools
     - tabix
     - ncbi-blast+
-    - conda
     - gcc
   homebrew:
     taps: brewsci/bio
