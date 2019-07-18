@@ -46,5 +46,7 @@ addons:
 
 script: 
   - make
-  - make test-travis
+  # basecalling can take a lot of time if only two cpus.
+  # Tell Travis to wait on stdout.
+  - travis_wait make test-travis
 
