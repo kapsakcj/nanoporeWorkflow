@@ -31,7 +31,6 @@ addons:
     - libboost-filesystem1.58.0
     - libboost-iostreams1.58.0
     - libboost-log1.58.0
-    - libdevel
   homebrew:
     taps: brewsci/bio
     casks:
