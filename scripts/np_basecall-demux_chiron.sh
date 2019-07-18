@@ -8,8 +8,6 @@
 #$ -cwd
 set -e
 
-source /etc/profile.d/modules.sh
-
 NSLOTS=${NSLOTS:=24}
 
 OUTDIR=$1
@@ -34,9 +32,6 @@ tmpdir=$(mktemp -p . -d chiron-qcat.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 mkdir $tmpdir/log
 echo "$0: temp dir is $tmpdir";
-
-module purge
-module load gcc/5.5
 
 # Test whether chiron is in the path
 #chiron --help >/dev/null 

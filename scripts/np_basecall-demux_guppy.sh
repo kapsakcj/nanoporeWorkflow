@@ -9,9 +9,6 @@
 #####$ -l gpu=1 commented out cuz guppy runs in cpu mode
 set -e
 
-source /etc/profile.d/modules.sh
-module purge
-
 NSLOTS=${NSLOTS:=24}
 
 OUTDIR=$1
@@ -36,9 +33,6 @@ tmpdir=$(mktemp -p . -d guppy.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 mkdir $tmpdir/log
 echo "$0: temp dir is $tmpdir";
-
-module purge
-module load guppy/2.3.5
 
 # Base calling
 guppy_basecaller -i $FAST5DIR -s $tmpdir/fastq --gpu_runners_per_device 96 --cpu_threads_per_caller $NSLOTS --num_callers $NSLOTS --flowcell FLO-MIN106 --kit SQK-LSK109 --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r

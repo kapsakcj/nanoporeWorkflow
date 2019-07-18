@@ -6,9 +6,6 @@
 #$ -V -cwd
 set -e
 
-source /etc/profile.d/modules.sh
-module purge
-
 NSLOTS=${NSLOTS:=24}
 
 FASTQDIR=$1

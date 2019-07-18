@@ -7,9 +7,6 @@
 #$ -V -cwd
 set -e
 
-source /etc/profile.d/modules.sh
-module purge
-
 NSLOTS=${NSLOTS:=24}
 #echo '$NSLOTS set to:' $NSLOTS
 
@@ -33,13 +30,6 @@ hostname
 tmpdir=$(mktemp -p . -d nanopolish.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 echo "$0: temp dir is $tmpdir";
-
-module load nanopolish/0.11.1
-module load minimap2/2.16
-module load samtools/1.8
-module load tabix/0.2.6
-module load gcc/5.5
-module load Python/3.7
 
 dir=$INDIR
 echo '$dir is set to:' ${dir}

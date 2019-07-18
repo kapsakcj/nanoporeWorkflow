@@ -17,9 +17,6 @@ make_directory() {
     fi
 }
 
-source /etc/profile.d/modules.sh
-module purge
-
 NSLOTS=${NSLOTS:=1}
 #echo '$NSLOTS set to:' $NSLOTS
 
@@ -70,8 +67,6 @@ echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 
 # Assemble.
 echo "Assembling with wtdbg2..."
-module purge
-module load wtdbg2/2.4
 wtdbg2 -t $NSLOTS -i ${dir}/all.fastq.gz -fo ${dir}/wtdbg2 -p 19 -AS 2 -s 0.05 -L $MINLENGTH -g $GENOMELENGTH -X $LONGREADCOVERAGE
 
 # Generate the actual assembly using wtpoa-cns
