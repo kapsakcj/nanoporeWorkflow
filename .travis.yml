@@ -47,7 +47,7 @@ addons:
 script: 
   - make
   # basecalling can take a lot of time if only two cpus.
-  # Tell Travis to wait up to 120 minutes on stdout.
-  - travis_wait 120 make t/np_basecall-demux_guppy.sh.done
+  # Tell Travis to wait up to 240 minutes on stdout.
+  - travis_wait 240 make t/np_basecall-demux_guppy.sh.done
   - make test
 
