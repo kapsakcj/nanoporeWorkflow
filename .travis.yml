@@ -4,6 +4,13 @@ language: bash
 before_install:
   - export PATH=$PATH:./nanopolish:./minimap2-2.17_x64-linux
   - wget https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_cpu_3.2.1-1~xenial_amd64.deb && sudo apt install ./ont_guppy_cpu_3.2.1-1~xenial_amd64.deb
+
+  # per https://askubuntu.com/a/863986
+  - sudo chown -R _apt:root /var/lib/update-notifier/package-data-downloads/partial
+  - sudo rm /var/lib/update-notifier/package-data-downloads/partial/*.FAILED
+  - sudo apt install --reinstall ./ont_guppy_cpu_3.2.1-1~xenial_amd64.deb
+
+  - guppy_basecaller # ensure it works
   - curl -L https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17_x64-linux.tar.bz2 | tar -jxvf -
   #- git clone --recursive https://github.com/jts/nanopolish.git && ( cd nanopolish && git checkout v0.11.1 && make)
   #- wget -q https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_2.2.2-1~xenial_amd64.deb && dpkg -i --ignore-depends=nvidia-384,libcuda1-384 ont_guppy_2.2.2-2~xenial_amd64.deb
