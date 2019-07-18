@@ -6,8 +6,6 @@ load environment
 thisDir=$BATS_TEST_DIRNAME
 scriptsDir=$(realpath "$thisDir/../scripts")
 
-$scriptsDir/np_basecall-demux_guppy.sh
-
 @test "Usage statement" {
   run bash $scriptsDir/np_basecall-demux_guppy.sh
   [ "$status" -eq 1 ] # usage exits with 1
