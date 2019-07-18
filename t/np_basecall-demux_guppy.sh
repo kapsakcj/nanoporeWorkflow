@@ -6,9 +6,7 @@ load environment
 thisDir=$BATS_TEST_DIRNAME
 scriptsDir=$(realpath "$thisDir/../scripts")
 
-echo "======"
 $scriptsDir/np_basecall-demux_guppy.sh
-echo "======"
 
 @test "Usage statement" {
   run bash $scriptsDir/np_basecall-demux_guppy.sh
