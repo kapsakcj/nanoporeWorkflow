@@ -39,8 +39,5 @@ addons:
 
 script: 
   - make
-  - make t/np_basecall-demux_guppy.done
-  - make t/np_prepSample_readLengths.sh.done
-  - make t/np_assemble_wtdbg2.sh.done
-  - make t/np_polish_medaka.sh.done
+  - make test-travis
 

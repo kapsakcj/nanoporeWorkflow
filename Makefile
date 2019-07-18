@@ -48,3 +48,6 @@ t/%.done:
 
 test: t/np_basecall-demux_guppy.sh.done t/np_prepSample_readLengths.sh.done t/np_assemble_wtdbg2.sh.done t/np_polish_medaka.sh.done
 
+# The subset of tests to be done on travis, limited by prerequisites
+test-travis: t/np_basecall-demux_guppy.sh.done t/np_prepSample_readLengths.sh.done t/np_assemble_wtdbg2.sh.done t/np_polish_medaka.sh.done
+
