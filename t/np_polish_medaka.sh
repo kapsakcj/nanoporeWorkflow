@@ -45,7 +45,7 @@ projectDir=$thisDir/vanilla.project/barcode12
     ' > $projectDir/polished.scores.tsv
 
   score1=$(grep ctg1 $projectDir/polished.scores.tsv | cut -f 2)
-  [ "$score1" -gt 100000 ]
+  [ "$score1" -gt 60000 ]
   score2=$(grep ctg2 $projectDir/polished.scores.tsv | cut -f 2)
   [ "$score2" -gt 40000  ]
   score3=$(grep ctg3 $projectDir/polished.scores.tsv | cut -f 2)
