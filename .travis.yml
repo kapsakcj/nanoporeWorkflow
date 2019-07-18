@@ -22,7 +22,7 @@ addons:
     - libeigen3-dev
     - libhdf5-dev
     - libhdf5-cpp-11
-    - libc
+    - libc6
     - libcurl4-openssl-dev
     - libzmq5
     - libboost-atomic1.58.0
