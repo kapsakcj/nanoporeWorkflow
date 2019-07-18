@@ -2,10 +2,10 @@ sudo: true
 language: bash
 before_install:
   - export PATH=$PATH:./nanopolish:./minimap2-2.17_x64-linux
+  - wget https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_cpu_3.2.1-1~xenial_amd64.deb && sudo dpkg -i --ignore-depends=nvidia-384,libcuda1-384 ont_guppy_cpu_3.2.1-1~xenial_amd64.deb
   - curl -L https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17_x64-linux.tar.bz2 | tar -jxvf -
   #- git clone --recursive https://github.com/jts/nanopolish.git && ( cd nanopolish && git checkout v0.11.1 && make)
   #- wget -q https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_2.2.2-1~xenial_amd64.deb && dpkg -i --ignore-depends=nvidia-384,libcuda1-384 ont_guppy_2.2.2-2~xenial_amd64.deb
-  - wget https://mirror.oxfordnanoportal.com/software/analysis/ont_guppy_cpu_3.2.1-1~xenial_amd64.deb && sudo dpkg -i --ignore-depends=nvidia-384,libcuda1-384 ont_guppy_cpu_3.2.1-1~xenial_amd64.deb
 addons:
   apt:
     sources:
@@ -20,6 +20,15 @@ addons:
     - gcc
     - libeigen3-dev
     - libhdf5-dev
+    - libhdf5-cpp-11 
+    - libc
+    - libcurl4-openssl-dev 
+    - libzmq5 
+    - libboost-atomic1.58.0 
+    - libboost-chrono1.58.0 
+    - libboost-date-time1.58.0 
+    - libboost-filesystem1.58.0 
+    - libboost-iostreams1.58.0 
   homebrew:
     taps: brewsci/bio
     casks:
