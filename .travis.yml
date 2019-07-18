@@ -48,5 +48,5 @@ script:
   - make
   # basecalling can take a lot of time if only two cpus.
   # Tell Travis to wait on stdout.
-  - travis_wait make test-travis
+  - travis_wait 60 make test-travis
 
