@@ -1,4 +1,4 @@
 #!/bin/bash
 
-export NSLOTS=24
+export NSLOTS=2
 

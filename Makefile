@@ -8,6 +8,7 @@
 .default: install
 
 install: t/.data-uncompress.done
+	@echo "Please edit t/environment.bash before running make test"
 
 # Make all large files depend on git-lfs
 t/data/.git-lfs.done:
