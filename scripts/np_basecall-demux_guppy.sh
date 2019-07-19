@@ -9,7 +9,7 @@
 #####$ -l gpu=1 commented out cuz guppy runs in cpu mode
 set -e
 
-NSLOTS=${NSLOTS:=24}
+NSLOTS=${NSLOTS:=2}
 
 OUTDIR=$1
 FAST5DIR=$2
@@ -35,7 +35,7 @@ mkdir $tmpdir/log
 echo "$0: temp dir is $tmpdir";
 
 # Base calling
-guppy_basecaller -i $FAST5DIR -s $tmpdir/fastq --gpu_runners_per_device 96 --cpu_threads_per_caller $NSLOTS --num_callers $NSLOTS --flowcell FLO-MIN106 --kit SQK-LSK109 --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r
+guppy_basecaller -i $FAST5DIR -s $tmpdir/fastq --gpu_runners_per_device 96 --cpu_threads_per_caller 1 --num_callers $NSLOTS --flowcell FLO-MIN106 --kit SQK-LSK109 --qscore_filtering 7 --enable_trimming yes --hp_correct yes -r
 
 # Demultiplex.  -r for recursive fastq search.
 guppy_barcoder -t $NSLOTS -r -i $tmpdir/fastq -s $tmpdir/demux
