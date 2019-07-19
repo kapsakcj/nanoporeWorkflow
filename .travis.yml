@@ -48,7 +48,7 @@ script:
   - make
   # basecalling can take a lot of time if only two cpus.
   # Explicitly have stdout being sent to the screen so that travis waits.
-  - bash scripts/np_basecall-demux_guppy.sh t/vanilla.project t/data/SalmonellaLitchfield.FAST5
+  - travis_wait 120 bash scripts/np_basecall-demux_guppy.sh t/vanilla.project t/data/SalmonellaLitchfield.FAST5
   # `make test` should test the output of the raw command.
   - make test
 
