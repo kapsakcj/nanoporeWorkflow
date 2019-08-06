@@ -7,7 +7,7 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
 ## TOC
   * [Scripts](#scripts)
   * [Workflows](#workflows)
-    * [Guppy GPU basecalling and demultiplexing with qcat](#guppy-gpu-basecalling-and-demultiplexing-with-qcat)
+    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-and-trimming)
     * [Assembly with wtdbg2 and polishing with Nanopolish](#assembly-with-wtdbg2-and-polishing-with-nanopolish)
   * [Contributing](#contributing)
   * [Future Plans](#future-plans)
@@ -34,15 +34,15 @@ This is a collection of workflows in the form of shell scripts.  They `qsub` the
 
 For `workflow.sh` the first positional parameter must be the project folder.  Both input and output go to the project folder.
 
-### Guppy GPU basecalling and demultiplexing with qcat
+### Guppy GPU basecalling, demultiplexing, and trimming
 
-`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling (& adapter trimming) and demultiplexing (& adapter/barcode trimming) with `qcat`
+`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
 
 `run_01_basecall-w-gpu.sh` is the runner/driver script for `01_basecall-w-gpu.sh`
 
 #### Requirements
   * Must be run while logged into directly node98 (Tesla V100 GPUs will eventually be a part of `qsub`, but are not currently, do NOT use qsub or run script on another node _unless it has a V100 GPU installed_)
-  * No one else must be running stuff on the node - this Guppy command will eat up all GPU resources
+  * No one else must be running stuff on the node
     * check CPU usage with `htop` and GPU usage with `nvtop` before running the script
   * Must be MinION data, generated with an R9.4.1 flowcell (FLO-MIN106) and ligation sequencing kit (SQK-LSK109)
     * Must be Native Barcodes 1-24 (NBD103/104/114)
@@ -53,12 +53,12 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
     1. `$OUTDIR` - an output directory
     2. `$FAST5DIR` - a directory containing raw fast5 files
     3. `$MODE` - basecalling mode/configuration - either `fast` or `hac` (high accuracy)
-  * copies fast5s from `$FAST5DIR` to `/tmp/$USER/guppy.gpu.XXXXXX`
+  * copies fast5s from `$FAST5DIR` to `/scratch/$USER/guppy.gpu.XXXXXX`
   * runs `guppy_basecaller` in either `fast` or `hac` mode
     * According to ONT - High accuracy mode will take anywhere from 5-8X longer to complete basecalling than fast mode, but will result in 2-3% higher read accuracy. 
-  * Demultiplexes using `qcat` and additionally trims adapter and barcode sequences (using `--trim` option w/ `qcat`)
-  * Compresses (gzip) the demultiplexed reads
-  * Copies demultiplexed & trimmed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
+  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD103` options)
+  * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
+  * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
   * Logs STDOUT from last time script was ran in `$OUTDIR/log/logfile-gpu-basecalling.txt` and all previous times in `$OUTDIR/log/logfile-gpu-basecalling_prev.txt`
  
  #### USAGE:
@@ -166,6 +166,7 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
 
 ## Future plans
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
+  * add modules for Racon polishing, followed by medaka consensus correction
   
 ## Resources
   * https://github.com/nanoporetech/qcat
