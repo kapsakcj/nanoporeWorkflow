@@ -52,17 +52,10 @@ BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
 # check to see if reads have been compresesd and renamed to all-barcodeXX.fastq.gz
-if [[ -e ${dir}/all-${BARCODE}.fastq.gz ]]; then
+if [[ -e ${dir}/all.fastq.gz ]]; then
   echo "Reads have been concatenated and renamed by 03_prepSample script already. Exiting...."
   exit 0
 fi
-
-### commented out since gzipping is done by previous script
-# Gzip them all
-#uncompressed=$(\ls $dir/*.fastq 2>/dev/null || true)
-#if [ "$uncompressed" != "" ]; then
-#  echo "$uncompressed" | xargs -P $NSLOTS gzip 
-#fi
 
 # Put all the individual gzip fastqs into a subdir,
 # Concatenate them, and then remove them.
@@ -70,13 +63,13 @@ fi
 echo "concatenating .fastq.gz files in barcode sub-dir..."
 mkdir -p ${dir}/fastqChunks
 mv ${dir}/*.fastq.gz ${dir}/fastqChunks
-cat ${dir}/fastqChunks/*.fastq.gz > ${dir}/all-${BARCODE}.fastq.gz
+cat ${dir}/fastqChunks/*.fastq.gz > ${dir}/all.fastq.gz
 rm -rf $dir/fastqChunks
 
 # Combine reads and count lengths in one stream
 echo "combining reads and counting read lengths..."
 LENGTHS=${dir}/readlengths.txt.gz
-zcat ${dir}/all-${BARCODE}.fastq.gz | perl -lne '
+zcat ${dir}/all.fastq.gz | perl -lne '
   next if($. % 4 != 2);
   print length($_);
 ' | sort -rn | gzip -cf > ${LENGTHS};
