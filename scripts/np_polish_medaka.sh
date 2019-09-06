@@ -6,7 +6,7 @@
 #$ -V -cwd
 set -e
 
-NSLOTS=${NSLOTS:=24}
+NSLOTS=${NSLOTS:=16}
 #echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
@@ -14,7 +14,7 @@ INDIR=$1
 set -u
 
 if [ "$INDIR" == "" ]; then
-    echo "Usage: $0 projectDir"
+    echo "Usage: $0 barcode-dir/"
     exit 1;
 fi;
 
@@ -32,14 +32,15 @@ echo '$dir is set to:' ${dir}
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
-FASTQ="$dir/all.fastq.gz"
+# commented out because unused variable
+#FASTQ="$dir/all.fastq.gz"
 
 # check to see if assembly has been polished, skip if so
-if [[ -e ${dir}/polished.fasta ]]; then
+if [[ -e ${dir}medaka/polished.fasta ]]; then
   echo "Assembly has already been polished. Exiting...."
   exit 0
 fi
 
-medaka_consensus -d "$dir/unpolished.fasta" -i "$FASTQ" -o "$dir/polished.medaka" -t $NSLOTS
-ln -v "$dir/polished.medaka/consensus.fasta" $dir/polished.fasta
-
+echo "Running Medaka via singularity container..."
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.0.8.1.staphb.simg \
+  medaka_consensus -i /data/reads.minlen1000.600Mb.fastq.gz -m r941_min_high -t ${NSLOTS} -o /data/medaka -d /data/racon/ctg.consensus.iteration4.fasta

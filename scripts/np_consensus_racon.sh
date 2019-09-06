@@ -1,8 +1,9 @@
 #!/bin/bash
 #$ -o racon.log
+#$ -e racon.err
 #$ -j y
 #$ -N racon
-#$ -pe smp 2-16
+#$ -pe smp 2-24
 #$ -V -cwd
 set -e
 
@@ -24,7 +25,7 @@ INDIR=$1
 set -u
 
 if [ "$INDIR" == "" ]; then
-    echo "Usage: $0 projectDir"
+    echo "Usage: $0 barcode-dir/"
     exit 1;
 fi;
 
@@ -42,11 +43,11 @@ echo '$dir is set to:' ${dir}
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
-FASTQ="${dir}all.fastq.gz"
+FASTQ="${dir}reads.minlen1000.600Mb.fastq.gz"
 
 # check to see if assembly has been through consensus correction, skip if so
 # TODO - change the -e check here to check for output of racon
-if [[ -e ${dir}/polished.fasta ]]; then
+if [[ -e ${dir}polished.fasta ]]; then
   echo "Assembly has already been polished. Exiting...."
   exit 0
 fi
@@ -74,7 +75,7 @@ else
   do  
     echo '$iteration =' $iteration
     echo "Running Racon to generate a consensus..."
-    # if on first iteration, run racon draft using assembly from flye/wtdbg2
+    # if on first iteration, run racon using draft assembly from flye/wtdbg2
     if [[ $iteration == 1 ]]; then
       racon -m 8 -x -6 -g -8 -w 500 -t ${NSLOTS} ${FASTQ} ${dir}racon/alignment.paf ${dir}*/assembly.fasta > ${dir}racon/ctg.consensus.iteration${iteration}.fasta
     else 
@@ -90,7 +91,3 @@ else
     ((iteration++))
   done
 fi
-
-
-#medaka_consensus -d "$dir/unpolished.fasta" -i "$FASTQ" -o "$dir/polished.medaka" -t $NSLOTS
-#ln -v "$dir/polished.medaka/consensus.fasta" $dir/polished.fasta

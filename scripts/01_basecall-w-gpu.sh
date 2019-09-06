@@ -24,7 +24,8 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=36}
+# node98 has 20 threads
+NSLOTS=${NSLOTS:=20}
 OUTDIR=$1
 FAST5DIR=$2
 

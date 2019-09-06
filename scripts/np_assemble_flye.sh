@@ -7,6 +7,17 @@
 #$ -V -cwd
 set -e
 
+# This script will take the output of 03_prepSample-w-gpu.sh and assemble using flye.
+
+### REQUIREMENTS:
+# singularity
+# access to flye singularity image at /apps/standalone/singularity/flye/flye.2.5.staphb.simg
+
+### USAGE:
+# NOTE: barcode-dir/ MUST end with a forward slash '/'
+#
+# /path/to/nanoporeWorkflow/scripts/np_assemble_flye.sh barcode-dir/
+
 #This function will check to make sure the directory doesn't already exist before trying to create it
 make_directory() {
     if [ -e $1 ]; then
@@ -50,7 +61,7 @@ BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
 # check to see if sample has already been assembled, skip if so
-if [[ -e ${INDIR}/unpolished.fasta ]]; then
+if [[ -e ${dir}flye/assembly.fasta ]]; then
   echo "Reads have been assembled by np_assemble_flye script already. Skipping...."
   exit 0
 fi
@@ -65,10 +76,11 @@ echo '$LENGTHS set to:' $LENGTHS
 MINLENGTH=$(zcat "$LENGTHS" | sort -rn | perl -lane 'chomp; $minlength=$_; $cum+=$minlength; $cov=$cum/'$GENOMELENGTH'; last if($cov > '$LONGREADCOVERAGE'); END{print $minlength;}')
 echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 
-module load flye/2.4.1
+# Using Singularity container since it has Flye 2.5 (latest as of Sept 2019)
+#module load flye/2.4.1
 
 # Assemble.
 echo "Assembling with flye..."
-singularity exec --no-home -B $PWD:/data ~/singularity-images/flye.2.5.dhub \
-  flye --nano-raw /data/${dir}all.fastq.gz -o /data/${dir}flye --g 96k --meta -t $NSLOTS
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.5.staphb.simg \
+  flye --nano-raw /data/reads.minlen1000.600Mb.fastq.gz -o /data/flye -g 5m --plasmids -t $NSLOTS
 
