@@ -142,9 +142,13 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
 
 ## Future plans
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
-  * add modules for Racon polishing, followed by medaka consensus correction
+    * rapid barcoding kit RBK-004 is next
+  * Add option for Medaka polishing with r941_min_fast model, if reads were basecalled with the fast Guppy model
   
 ## Resources
+  * https://github.com/fenderglass/Flye
+  * https://github.com/isovic/racon
+  * https://github.com/nanoporetech/medaka
   * https://github.com/nanoporetech/qcat
   * How to set Guppy parameters (requires Nanopore Community login credentials) https://community.nanoporetech.com/protocols/Guppy-protocol/v/gpb_2003_v1_revl_14dec2018/how-to-configure-guppy-parameters
 
