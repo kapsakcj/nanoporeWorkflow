@@ -69,10 +69,10 @@ git clone https://github.com/lskatz/nanoporeWorkflow.git
 
 # Specified dirs MUST end with a '/'
 Usage: 
+# high accuracy mode (highly recommend this mode over fast mode, it's worth waiting the extra runtime)
+    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ hac
 # fast mode
     ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ fast
-# high accuracy mode
-    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ hac
 
 # OUTPUT
 $OUTDIR
