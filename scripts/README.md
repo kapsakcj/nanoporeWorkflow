@@ -11,4 +11,4 @@ They are designed so that they can be replaced modularly.
 | Assembly | `np_assemble_flye.sh` | barcode directory | `reads.minlen1000.600Mb.fastq.gz` | `flye/assembly.fasta` |
 | Polishing        | `polish`         | barcode directory | `unpolished.fasta` and either fastq or fast5 files as a parameter | `polished.fasta` |
 | Polishing | `np_consensus_racon.sh` | barcode directory | `flye/assembly.fasta` | `ctg.consensus.iteration4.fasta` |
-| Polishing | `np_polishing_medaka.sh` | barcode directory | `racon/ctg.consensus.iteration4.fasta` | `medaka/polished.fasta` |
+| Polishing | `np_polish_medaka.sh` | barcode directory | `racon/ctg.consensus.iteration4.fasta` | `medaka/polished.fasta` |
