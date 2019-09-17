@@ -28,7 +28,7 @@ echo $PATH | tr ":" "\n" | nl
 # check to see if OUTDIR argument is empty, if so exit script
 if [ "$OUTDIR" == "" ]; then
     echo ""
-    echo "Usage: $thisScript outdir/ fast5dir/"
+    echo "Usage: $thisScript outdir/"
     echo ""
     exit 1;
 fi;
@@ -42,14 +42,6 @@ tmpdir=$(mktemp -p . -d ONT-ASM.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 mkdir $tmpdir/log
 echo "$0: temp dir is $tmpdir";
-
-### commented out because basecalling on GPU should be done separately, while 
-### logged in directly to node 98
-#uuid1=$(uuidgen)
-#jobName1="basecall-$uuid1"
-#qsub -pe smp 1-$NSLOTS -N $jobName1 -cwd -o log/$jobName1.log -j y \
-#  01_basecall.sh $OUTDIR $FAST5DIR
-
 
 # Removed '-pe smp 1-$NSLOTS' from qsub commands since each of the scripts set differing numbers of threads
 # Now that it is demultiplexed, deal with each sample at a time.
