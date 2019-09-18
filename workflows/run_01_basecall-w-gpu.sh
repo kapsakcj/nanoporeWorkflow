@@ -15,6 +15,10 @@ OUTDIR=$1
 FAST5DIR=$2
 MODE=$3
 
+# make $OUTDIR and $OUTDIR/log if it doesn't exist
+make_directory ${OUTDIR}
+make_directory ${OUTDIR}log
+
 if find ${OUTDIR}log/logfile-gpu-basecalling.txt 2>/dev/null ;
 then
     cat ${OUTDIR}log/logfile-gpu-basecalling.txt >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
@@ -35,7 +39,6 @@ if [ "$FAST5DIR" == "" ]; then
     exit 1;
 fi;
 
-make_directory ${OUTDIR}log
 
 thisDir=$(dirname $0)
 

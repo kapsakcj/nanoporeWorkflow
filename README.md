@@ -7,8 +7,8 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
 ## TOC
   * [Scripts](#scripts)
   * [Workflows](#workflows)
-    * [Guppy GPU basecalling and demultiplexing with qcat](#guppy-gpu-basecalling-and-demultiplexing-with-qcat)
-    * [Assembly with wtdbg2 and polishing with Nanopolish](#assembly-with-wtdbg2-and-polishing-with-nanopolish)
+    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-and-trimming)
+    * [Assembly with Flye and polishing with Racon and Medaka](#assembly-with-flye-and-polishing-with-racon-and-medaka)
   * [Contributing](#contributing)
   * [Future Plans](#future-plans)
   * [Resources](#resources)
@@ -34,31 +34,30 @@ This is a collection of workflows in the form of shell scripts.  They `qsub` the
 
 For `workflow.sh` the first positional parameter must be the project folder.  Both input and output go to the project folder.
 
-### Guppy GPU basecalling and demultiplexing with qcat
+### Guppy GPU basecalling, demultiplexing, and trimming
 
-`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling (& adapter trimming) and demultiplexing (& adapter/barcode trimming) with `qcat`
+`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
 
 `run_01_basecall-w-gpu.sh` is the runner/driver script for `01_basecall-w-gpu.sh`
 
 #### Requirements
-  * Must be run while logged into directly node98 (Tesla V100 GPUs will eventually be a part of `qsub`, but are not currently, do NOT use qsub or run script on another node _unless it has a V100 GPU installed_)
-  * No one else must be running stuff on the node - this Guppy command will eat up all GPU resources
+  * Must be run while logged into directly node98 (Tesla V100 GPUs are available through `qsub`, but are not do not have flash-based storage available yet. This script is set up for node98 to take advantage of its SSD)
+  * No one else must be running stuff on the node
     * check CPU usage with `htop` and GPU usage with `nvtop` before running the script
   * Must be MinION data, generated with an R9.4.1 flowcell (FLO-MIN106) and ligation sequencing kit (SQK-LSK109)
     * Must be Native Barcodes 1-24 (NBD103/104/114)
-    * We'd like to add flags for other flowcells and sequencing kit when we come across data from those!
+    * We'd like to add options for other flowcells and sequencing kit when we come across data from those!
 
 #### This workflow does the following:
   * Takes in 3 arguments (in this order):
     1. `$OUTDIR` - an output directory
     2. `$FAST5DIR` - a directory containing raw fast5 files
-    3. `$MODE` - basecalling mode/configuration - either `fast` or `hac` (high accuracy)
-  * copies fast5s from `$FAST5DIR` to `/tmp/$USER/guppy.gpu.XXXXXX`
-  * runs `guppy_basecaller` in either `fast` or `hac` mode
-    * According to ONT - High accuracy mode will take anywhere from 5-8X longer to complete basecalling than fast mode, but will result in 2-3% higher read accuracy. 
-  * Demultiplexes using `qcat` and additionally trims adapter and barcode sequences (using `--trim` option w/ `qcat`)
-  * Compresses (gzip) the demultiplexed reads
-  * Copies demultiplexed & trimmed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
+    3. `$MODE` - basecalling mode/configuration - either `fast` or `hac` (high accuracy, _recommended mode_)
+  * copies fast5s from `$FAST5DIR` to `/scratch/$USER/guppy.gpu.XXXXXX`
+  * runs `guppy_basecaller` in either `fast` or `hac` mode 
+  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD103` options)
+  * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
+  * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
   * Logs STDOUT from last time script was ran in `$OUTDIR/log/logfile-gpu-basecalling.txt` and all previous times in `$OUTDIR/log/logfile-gpu-basecalling_prev.txt`
  
  #### USAGE:
@@ -70,16 +69,16 @@ git clone https://github.com/lskatz/nanoporeWorkflow.git
 
 # Specified dirs MUST end with a '/'
 Usage: 
+# high accuracy mode (highly recommend this mode over fast mode, it's worth waiting the extra runtime)
+    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ hac
 # fast mode
     ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ fast
-# high accuracy mode
-    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ hac
 
 # OUTPUT
 $OUTDIR
 ├── demux
 │   ├── barcode06
-│   │   └── barcode06.fastq.gz
+│   │   └── barcode06.fastq.gz (there will be many .fastq.gz files per barcode)
 │   ├── barcode10
 │   │   └── barcode10.fastq.gz
 │   ├── barcode12
@@ -91,83 +90,65 @@ $OUTDIR
     └── logfile-gpu-basecalling.txt
 ```
 
-### Assembly with wtdbg2 and polishing with Nanopolish
+### Assembly with Flye and polishing with Racon and Medaka
 
 #### This workflow does the following:
-  * Takes in 2 arguments (in this order):
-    1. `$outdir` - an output directory
-    2. `$FAST5DIR` - a directory containing raw fast5 files
+  * Takes in 1 argument:
+    1. `$outdir` - The output directory from running `run_01_basecall-w-gpu.sh`, containing `demux/barcodeXX/` directories
   * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
-  * Assembles using wtdbg2
-  * Polishes using nanopolish
+  * Runs `filtlong` via singularity to remove reads <1000bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
+  * Assembles downsampled/filtered reads using `Flye` via singularity (`--plasmids` and `-g 5M` options used)
+  * Polishes flye draft assembly using racon 4 times
+  * Polishes racon polished assembly using Medaka via singularity (specific to r9.4.1 flowcell and high accuracy basecaller, `--m r941_min_high` option used)
 
 #### Requirements
   * Must have previously run the above script that basecalls reads on a GPU via node98.
   * Not necessary to be on node98. Any server with the ability to `qsub` will work.
   * `outdir` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
-    * Recommend `cd`'ing to that directory and use `.` as the `outdir` argument (see USAGE below)
+    * Recommend `cd`'ing to one directory above and use `.` as the `outdir` argument (see USAGE below)
 
 #### USAGE
 ```bash
 Usage: 
-    # use your favorite queue, doesn't have to be all.q
-    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh outdir/ fast5dir/
+    # example - if you are one directory above the output directory from the gpu-basecalling script
+    ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh outdir/
 
-    # example - if you are in your output directory from the gpu-basecalling script
-    cd outdir/
-    qsub -q all.q ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh . ../FAST5/
-
-# OUTPUT
+# OUTPUT - only showing one barcode for brevity, not all files included
 $OUTDIR
-├── demux
-│   ├── barcode12 # only showing one barcode for brevity
-│   │   ├── all-barcode12.fastq.gz
-│   │   ├── all-barcode12.fastq.gz.index
-│   │   ├── all-barcode12.fastq.gz.index.fai
-│   │   ├── all-barcode12.fastq.gz.index.gzi
-│   │   ├── all-barcode12.fastq.gz.index.readdb
-│   │   ├── consensus.ctg1:0-11000.log # A LOT OF THESE, for each chunk of each contig
-│   │   ├── consensus.ctg1:0-11000.vcf.gz # A LOT OF THESE, for each chunk of each contig
-│   │   ├── polished.fasta
-│   │   ├── rangesCounter.txt
-│   │   ├── readlengths.txt.gz
-│   │   ├── reads.bam
-│   │   ├── reads.bam.bai
-│   │   ├── unpolished.fasta
-│   │   ├── unpolished.fasta.fai
-│   │   ├── wtdbg2.1.dot.gz
-│   │   ├── wtdbg2.1.nodes
-│   │   ├── wtdbg2.1.reads
-│   │   ├── wtdbg2.2.dot.gz
-│   │   ├── wtdbg2.3.dot.gz
-│   │   ├── wtdbg2.alignments.gz
-│   │   ├── wtdbg2.binkmer
-│   │   ├── wtdbg2.closed_bins
-│   │   ├── wtdbg2.clps
-│   │   ├── wtdbg2.ctg.dot.gz
-│   │   ├── wtdbg2.ctg.lay.gz
-│   │   ├── wtdbg2.events
-│   │   ├── wtdbg2.frg.dot.gz
-│   │   ├── wtdbg2.frg.nodes
-│   │   └── wtdbg2.kmerdep
+demux/
+├── barcode07
+│   ├── all.fastq.gz
+│   ├── flye
+│   ├── medaka
+│   ├── racon
+│   ├── readlengths.txt.gz
+│   └── reads.minlen1000.600Mb.fastq.gz
 └── log
-    ├── prepSample-35d239ad-f2c3-4472-b810-76f56ad43c1d.log # one of each of these logs for each barcode
-    ├── assemble-f73c45e5-ceb4-4aae-bc13-c9923adfe63a.log
-    └── polish-c1888109-727b-4a99-bc92-69c12e97222e.log
+log/
+├── assemble-13f6870a-e7ab-4475-8acc-6762e57e5d55.log # one of each of these logs for each barcode
+├── polish-medaka-3d22f12c-8a50-4dd7-9cc6-7c1bc5098b48.log
+├── polish-racon-6c22aa55-5a95-4d17-9a01-abeade24b431.log
+└── prepSample-157680be-7f14-4a32-8a74-4bfe5de0b624.log
 ```
 #### Notes on assembly and polishing workflow
   * It will check for the following files, to determine if it should skip any of the steps. Helps if one part doesn't run correctly and you don't want to repeat a certain step, e.g. re-assembling.
-    * `03_preppSample-w-gpu.sh` looks for `./demux/barcodeXX/all-barcodeXX.fastq.gz` 
-    * `05_assemble.sh` looks for `./demux/barcodeXX/unpolished.fasta`
-    * `07_nanopolish.sh` looks for `./demux/barcodeXX/polished.fasta`
+    * `03_prepSample-w-gpu.sh` looks for `./demux/barcodeXX/reads.minlen1000.600Mb.fastq.gz` 
+    * `np_assemble_flye.sh` looks for `./demux/barcodeXX/flye/assembly.fasta`
+    * `np_consensus_racon.sh` looks for `./demux/barcodeXX/racon/ctg.consensus.iteration4.fasta`
+    * `np_polish_medaka.sh` looks for `./demux/barcodeXX/medaka/polished.fasta`
 
 ## Contributing
 If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
 
 ## Future plans
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
+    * rapid barcoding kit RBK-004 is next
+  * Add option for Medaka polishing with r941_min_fast model, if reads were basecalled with the fast Guppy model
   
 ## Resources
+  * https://github.com/fenderglass/Flye
+  * https://github.com/isovic/racon
+  * https://github.com/nanoporetech/medaka
   * https://github.com/nanoporetech/qcat
   * How to set Guppy parameters (requires Nanopore Community login credentials) https://community.nanoporetech.com/protocols/Guppy-protocol/v/gpb_2003_v1_revl_14dec2018/how-to-configure-guppy-parameters
 

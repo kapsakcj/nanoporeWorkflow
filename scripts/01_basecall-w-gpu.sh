@@ -2,6 +2,10 @@
 
 # Curtis Kapsak pjx8@cdc.gov
 
+# This script runs guppy_basecaller via port 9999 on guppy_basecall_server that 
+# should be continously running on node98. Either fast or high-accuracy mode
+# can be used. Guppy will produce demultiplexed, trimmed, and compressed fastqs.
+
 # UGE options removed, since this must be performed manually on node 98
 # May eventually be added, if GPUs (Tesla V100s) are available via UGE/qsub
 
@@ -20,10 +24,15 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=36}
+# node98 has 20 threads
+NSLOTS=${NSLOTS:=20}
 OUTDIR=$1
 FAST5DIR=$2
 
+# make output directory if it doesn't exist
+make_directory $1
+
+# make sure user specifies an input dir
 if [[ "$FAST5DIR" == "" ]]; then
       echo ""
       echo "    Usage: $0 outdir/ fast5dir/ fast"
@@ -59,9 +68,9 @@ date
 hostname
 echo '$USER is set to:' $USER
 
-# Setup tempdir in /tmp
+# Setup tmpdir in /scratch
 # Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
-tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
+tmpdir=$(mktemp -p /scratch/$USER/ -d guppy.gpu.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
@@ -70,7 +79,6 @@ echo "$0: temp dir is $tmpdir";
 make_directory $tmpdir/fast5
 fast5tmp=$tmpdir/fast5
 echo '$fast5tmp dir is set to:' $fast5tmp
-
 # check to see if basecalling/demultiplexing has been done and files exist in OUTDIR
 # if not, copy files into fast5tmp and begin
 if [[ -e  ${OUTDIR}demux/ ]]; then
@@ -78,14 +86,11 @@ if [[ -e  ${OUTDIR}demux/ ]]; then
     exit 0
 else
     echo "Copying reads from $FAST5DIR to $tmpdir"
-    cp -rv $FAST5DIR $fast5tmp
+    cp -r $FAST5DIR $fast5tmp
 fi
 
-# no module load for guppy, since it's installed natively on node 98
-module load qcat/1.0.1
-
 #### Basecalling using GPU ####
-# should return version 3.0.3
+# should return version 3.2.2
 guppy_basecaller -v
 # check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
 if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
@@ -93,90 +98,41 @@ if [[ -e $OUTDIR/demux/sequencing_summary.txt ]]; then
 else
   if [[ "$3" == "hac"  ]]; then
   guppy_basecaller -i $fast5tmp \
-                   -s $tmpdir/fastq \
-                   --num_callers $NSLOTS \
-                   --qscore_filtering 7 \
-                   --enable_trimming yes \
+                   -s $tmpdir/demux \
                    --hp_correct yes \
                    -r \
-                   -x "cuda:0 cuda:1" \
-                   -m /opt/ont/guppy/data/template_r9.4.1_450bps_hac.jsn \
-                   -c /opt/ont/guppy/data/dna_r9.4.1_450bps_hac.cfg \
-                   --chunk_size 1000 \
+                   -c dna_r9.4.1_450bps_hac.cfg \
                    --gpu_runners_per_device 2 \
                    --chunks_per_runner 1000 \
-                   --chunks_per_caller 10000 \
-                   --overlap 50 \
-                   --qscore_offset 0.25 \
-                   --qscore_scale 0.91 \
-                   --builtin_scripts 1 \
-                   --disable_pings
+                   --num_callers 8 \
+                   --compress_fastq \
+                   --trim_barcodes \
+                   --barcode_kits "EXP-NBD103" \
+                   --num_barcode_threads 8 \
+                   --port 9999
   elif [[ "$3" == "fast" ]]; then
   guppy_basecaller -i $fast5tmp \
-                   -s $tmpdir/fastq \
-                   --qscore_filtering 7 \
-                   --enable_trimming yes \
+                   -s $tmpdir/demux \
                    --hp_correct yes \
                    -r \
-                   -x "cuda:0 cuda:1" \
-                   -m /opt/ont/guppy/data/template_r9.4.1_450bps_fast.jsn \
-                   -c /opt/ont/guppy/data/dna_r9.4.1_450bps_fast.cfg \
-                   --chunk_size 1000 \
+                   -c dna_r9.4.1_450bps_fast.cfg \
                    --gpu_runners_per_device 8 \
                    --chunks_per_runner 256 \
-                   --chunks_per_caller 10000 \
-                   --overlap 50 \
-                   --qscore_offset -0.4 \
-                   --qscore_scale 0.98 \
-                   --builtin_scripts 1 \
-                   --disable_pings \
-                   --num_callers $NSLOTS
+                   --num_callers 8 \
+                   --compress_fastq \
+                   --trim_barcodes \
+                   --barcode_kits "EXP-NBD103" \
+                   --num_barcode_threads 8 \
+                   --port 9999 
   fi
 fi
-
-# should return qcat 1.0.1
-qcat --version
-# Demultiplex with qcat, multithreading not supported yet, already really fast on 1 thread
-# Native barcoding kit barcodes 1-24 specified
-# look in both pass and fail folders for reads (poor quality reads to be filterd out later w filtlong)
-if [[ -e $OUTDIR/demux/none.fastq ]]; then
-  echo "FASTQ files have already been demultiplexed. Skipping."
-else
-  echo "Demultiplexing with qcat now..."
-  cat $tmpdir/fastq/*/*.fastq | qcat --trim -k NBD104/NBD114 -b $tmpdir/demux --detect-middle 
-fi
-
-# retain the sequencing summary
-if [[ -e ${OUTDIR}demux/sequencing_summary.txt ]]; then
-  echo "sequencing_summary.txt has already been hardlinked into OUTDIR/demux/"
-else
-  ln -v $tmpdir/fastq/sequencing_summary.txt $tmpdir/demux
-fi
-
-# compress fastqs (will later not be necessary with new version of guppy which produces gzipped fastqs)
-uncompressed=$(\ls ${tmpdir}/demux/*.fastq 2>/dev/null || true)
-if [ "$uncompressed" != "" ]; then
-  echo "$uncompressed" | xargs -P $NSLOTS gzip 
-fi
-
 
 # copy demuxed fastqs into the specified OUTDIR
 if [[ -e $OUTDIR/demux/none.fastq ]]; then
   echo "Demuxed fastqs have been transferred from tmpdir to OUTDIR. Skipping."
 else
-  cp -rv $tmpdir/demux $OUTDIR
-fi
-
-# create subdirectories for each barcode, move fastq file there (does not do so for none.fastq)
-if [[ -e ${OUTDIR}demux/barcode06/ || -e ${OUTDIR}demux/barcode01/ ]]; then
-  echo "fastqs assigned a barcode have already been moved into subdirs. Skipping"
-else
-  echo "Moving demuxed reads into subdirs...."
-  for fastq in ${OUTDIR}demux/barcode*.fastq.gz; do
-    dir="${fastq%%.fastq.gz}"
-    mkdir -- "$dir"
-    mv -- "$fastq" "$dir"
-  done
+  echo "Copying reads from $tmpdir to $OUTDIR"
+  cp -r $tmpdir/demux $OUTDIR
 fi
 
 # making OUTDIR available to runner script for copying logfile into $tmpdir/log
