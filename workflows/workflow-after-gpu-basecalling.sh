@@ -2,7 +2,7 @@
 #$ -o workflow-after-gpu.log
 #$ -e workflow-after-gpu.err
 #$ -j y
-#$ -N wtdbg2
+#$ -N after-basecalling-workflow
 #$ -pe smp 1-36
 #$ -V -cwd
 set -e
