@@ -13,8 +13,8 @@ make_directory() {
 function HELP {
 echo ""
 echo "Usage: $0 "
-echo "                 -i path/to/fast5files/        must end with a forwardslash "
-echo "                 -o path/to/outputDirectory/   must end with a forwardslash "
+echo "                 -i path/to/fast5files/        "
+echo "                 -o path/to/outputDirectory/   "
 echo "                 -b y || yes || n || no        barcodes used?"
 echo "                 -f r941 || r10                flowcell type used?"
 echo "                 -k rapid || ligation          sequening kit used?"
