@@ -1,6 +1,8 @@
 # nanoporeWorkflow
 
-Shell scripts and workflows for working with Nanopore data. Most scripts use `qsub`, the GPU basecalling script does not.
+Shell scripts and workflows for working with Nanopore data. Submits jobs to CDC's Aspen HPC using `qsub`. 
+
+:warning: Don't bother reading if you aren't working on CDC's servers :warning:
 
 Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](https://github.com/kapsakcj) and potentially YOU!
 
@@ -15,7 +17,7 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
 
 ## Scripts
 
-This is a collection of scripts that do one thing at a time.  For example, demultiplexing or basecalling [except for `01_basecall-w-gpu.sh` which does both :) ].
+This is a collection of scripts that do one thing at a time.  For example, assembling or polishing an assembly [except for `01_basecall-w-gpu.sh` where guppy basecalls and demultiplexes simultaneously ].
 
 Each script should start with `np_` to indicate the nanopore workflow. Then,
 each script should be named after one of these namespaces, to help indicate which stage of the process.
@@ -30,49 +32,63 @@ in their names (e.g., a namespace of de_multiplex would be invalid.).
 
 ## Workflows
 
-This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually (except for `run_basecalling-w-gpu.sh` since the GPUs aren't available through `qsub` yet).
+This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually.
 
 For `workflow.sh` the first positional parameter must be the project folder.  Both input and output go to the project folder.
 
 ### Guppy GPU basecalling, demultiplexing, and trimming
 
-`run_01_basecall-w-gpu.sh` - `guppy` GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
+`run_01_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
 
 `run_01_basecall-w-gpu.sh` is the runner/driver script for `01_basecall-w-gpu.sh`
 
 #### Requirements
-  * Must be run while logged into directly node98 (Tesla V100 GPUs are available through `qsub`, but are not do not have flash-based storage available yet. This script is set up for node98 to take advantage of its SSD)
-  * No one else must be running stuff on the node
-    * check CPU usage with `htop` and GPU usage with `nvtop` before running the script
-  * Must be MinION data, generated with an R9.4.1 flowcell (FLO-MIN106) and ligation sequencing kit (SQK-LSK109)
-    * Must be Native Barcodes 1-24 (NBD103/104/114)
-    * We'd like to add options for other flowcells and sequencing kit when we come across data from those!
+
+  * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen (Aspen head node, Monoliths)
+  * Currently supported MinION data:
+    * R9.4.1 flowcell (FLO-MIN106)
+      * Rapid barcoding kit (RBK-004)
+      * Ligation sequencing kit (SQK-LSK109) + native barcodes 1-24 (NBD103/104/114)
+    * R10 flowcell
+      * Ligation sequencing kit (SQK-LSK109) + native barcodes 1-24 (NBD103/104/114)
+    * Currently unsupported combos (want to add in the future!):
+      * R9.4.1 + rapid or ligation sequencing kit without barcoding (RAD-004)
+      * R10 + ligation without barcoding 
+      * R10.3 + ligation with & without barcoding
 
 #### This workflow does the following:
-  * Takes in 3 arguments (in this order):
-    1. `$OUTDIR` - an output directory
-    2. `$FAST5DIR` - a directory containing raw fast5 files
-    3. `$MODE` - basecalling mode/configuration - either `fast` or `hac` (high accuracy, _recommended mode_)
-  * copies fast5s from `$FAST5DIR` to `/scratch/$USER/guppy.gpu.XXXXXX`
-  * runs `guppy_basecaller` in either `fast` or `hac` mode 
-  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD103` options)
+  * Takes in 5 arguments:
+    1. `-i path/to/fast5files/`      - the input directory containing raw fast5 files
+    2. `-o path/to/outputDirectory/` - an output directory
+    3. `-b y || yes || n || no`      - were barcodes used?
+    4. `-f r941 || r10`              - flowcell type used?
+    5. `-k rapid || ligation`         - sequencing kit used?
+  * copies fast5s from input directory to `/scratch/$USER/guppy.gpu.XXXXXX`
+  * runs `guppy_basecaller` in `hac` mode on GPUs
+  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD103" or "SQK-RBK004"` options)
   * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
   * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
-  * Logs STDOUT from last time script was ran in `$OUTDIR/log/logfile-gpu-basecalling.txt` and all previous times in `$OUTDIR/log/logfile-gpu-basecalling_prev.txt`
  
  #### USAGE:
 ```bash
-cd ~/
-# download the scripts
-# TODO - CHANGE THIS TO DL A SPECIFIC RELEASE
-git clone https://github.com/lskatz/nanoporeWorkflow.git
+# download the scripts, ignoring the test data stored via git-lfs
+$ GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/lskatz/nanoporeWorkflow.git 
 
-# Specified dirs MUST end with a '/'
-Usage: 
-# high accuracy mode (highly recommend this mode over fast mode, it's worth waiting the extra runtime)
-    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ hac
-# fast mode
-    ~/nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh outdir/ fast5dir/ fast
+# TODO - download the repo from a release, once one is made
+
+# optionally add the workflows to your $PATH (edit the PATH below to wherever you cloned the repo)
+$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow/workflows' >> ~/.bashrc
+# refresh your environment
+$ source ~/.bashrc
+
+Usage: ../nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh
+                 -i path/to/fast5files/        
+                 -o path/to/outputDirectory/   
+                 -b y || yes || n || no        barcodes used?
+                 -f r941 || r10                flowcell type used?
+                 -k rapid || ligation          sequencing kit used?
+
+example: ../nanoporeWorkflow/workflows/run_01_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
 
 # OUTPUT
 $OUTDIR
@@ -84,10 +100,8 @@ $OUTDIR
 │   ├── barcode12
 │   │   └── barcode12.fastq.gz
 │   ├── none.fastq.gz
-│   └── sequencing_summary.txt
-└── log
-    ├── logfile-gpu-basecalling_prev.txt # only present if you ran the script more than once
-    └── logfile-gpu-basecalling.txt
+|   └── sequencing_summary.txt
+
 ```
 
 ### Assembly with Flye and polishing with Racon and Medaka
@@ -102,7 +116,7 @@ $OUTDIR
   * Polishes racon polished assembly using Medaka via singularity (specific to r9.4.1 flowcell and high accuracy basecaller, `--m r941_min_high` option used)
 
 #### Requirements
-  * Must have previously run the above script that basecalls reads on a GPU via node98.
+  * Must have previously run the above script that basecalls reads on a GPU node.
   * Not necessary to be on node98. Any server with the ability to `qsub` will work.
   * `outdir` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
     * Recommend `cd`'ing to one directory above and use `.` as the `outdir` argument (see USAGE below)
@@ -142,7 +156,9 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
 
 ## Future plans
   * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
-    * rapid barcoding kit RBK-004 is next
+    * R9.4.1 + rapid or ligation sequencing kit without barcoding (RAD-004)
+    * R10 + ligation without barcoding 
+    * R10.3 + ligation with & without barcoding
   * Add option for Medaka polishing with r941_min_fast model, if reads were basecalled with the fast Guppy model
   
 ## Resources
@@ -151,4 +167,3 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
   * https://github.com/nanoporetech/medaka
   * https://github.com/nanoporetech/qcat
   * How to set Guppy parameters (requires Nanopore Community login credentials) https://community.nanoporetech.com/protocols/Guppy-protocol/v/gpb_2003_v1_revl_14dec2018/how-to-configure-guppy-parameters
-
