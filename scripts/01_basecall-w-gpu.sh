@@ -2,12 +2,11 @@
 #$ -o guppy-gpu.log
 #$ -e guppy-gpu.err
 #$ -j y
-#$ -q gpu.q
+#$ -jc guppy
 #$ -N guppy-gpu
 #$ -V -cwd
 
 # removed -pe smp 2-20 since all GPU nodes have 20 CPUs
-# removed #$ -jc guppy since new SCBS guidelines don't show UGE job class param
 
 # Curtis Kapsak pjx8@cdc.gov
 
