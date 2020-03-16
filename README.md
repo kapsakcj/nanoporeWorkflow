@@ -44,7 +44,7 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
 
 #### Requirements
 
-  * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen (Biolinux, Monoliths, Aspen head node)
+  * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen (Aspen head node, Monoliths)
   * Currently supported MinION data:
     * R9.4.1 flowcell (FLO-MIN106)
       * Rapid barcoding kit (RBK-004)
