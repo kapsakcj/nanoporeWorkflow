@@ -114,8 +114,9 @@ fi
 
 thisDir=$(dirname $0)
 
+mkdir -pv ${OUTDIR}/log
 
 # call the actual basecalling script
 # no need to pass variables since they are exported when set above (I think?)
-# qsub will make logs for STDOUT/STDERR
-command time -v qsub ${thisDir}/../scripts/01_basecall-w-gpu.sh
+# qsub will put logs into OUTDIR/log for tidyness
+qsub -o ${OUTDIR}/log ${thisDir}/../scripts/01_basecall-w-gpu.sh

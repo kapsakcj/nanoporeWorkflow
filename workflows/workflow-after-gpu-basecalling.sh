@@ -18,17 +18,26 @@ FAST5DIR=$2
 set -u
 
 thisDir=$(dirname $0);
-echo '$thisDir set to:' $thisDir
+#echo '$thisDir set to:' $thisDir
 thisScript=$(basename $0);
-echo '$thisScript set to:' $thisScript
+#echo '$thisScript set to:' $thisScript
 export PATH=$thisDir/../scripts:$PATH
-echo '$PATH is set in this order:'
-echo $PATH | tr ":" "\n" | nl
+#echo '$PATH is set in this order:'
+#echo $PATH | tr ":" "\n" | nl
 
 # check to see if OUTDIR argument is empty, if so exit script
 if [ "$OUTDIR" == "" ]; then
+    echo "Please supply the path to the output directory from basecalling with the run_01_basecall-w-gpu.sh script"
     echo ""
     echo "Usage: $thisScript outdir/"
+    echo ""
+    echo "This workflow runs the following on barcodes 01-12:"
+    echo ""
+    echo "-filtlong	removes reads <1000bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
+    echo "-flye		--plasmids and -g 5M options used"
+    echo "-racon		polishes 4X with Racon"
+    echo "-medaka		polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile"
+    echo ""
     echo ""
     exit 1;
 fi;
@@ -47,28 +56,32 @@ echo "$0: temp dir is $tmpdir";
 # Now that it is demultiplexed, deal with each sample at a time.
 for barcodeDir in ${OUTDIR}demux/barcode[0-12]*; do
 
+  # make log dir per barcode, for storing qsub log files
+  mkdir -pv $barcodeDir/log
+
   # Prep the sample
   uuid2=$(uuidgen)
   jobName2="prepSample-$uuid2"
   # removed 'qsub -hold_jid $jobName1' since basecalling should already be done
-  qsub -N $jobName2 -cwd -o log/$jobName2.log -j y \
+  qsub -N $jobName2 -cwd -o ${barcodeDir}/log/$jobName2.log -j y \
     ${thisDir}/../scripts/03_prepSample-w-gpu.sh ${barcodeDir}/
   
   # Assemble the sample
   uuid3=$(uuidgen)
   jobName3="assemble-$uuid3"
-  qsub -hold_jid $jobName2 -N $jobName3 -cwd -o log/$jobName3.log -j y \
+  qsub -hold_jid $jobName2 -N $jobName3 -cwd -o ${barcodeDir}/log/$jobName3.log -j y \
     ${thisDir}/../scripts/np_assemble_flye.sh ${barcodeDir}/
 
   # Polish the sample with Racon
   uuid4=$(uuidgen)
   jobName4="polish-racon-$uuid4"
-  qsub -hold_jid $jobName3 -N $jobName4 -cwd -o log/$jobName4.log -j y \
+  qsub -hold_jid $jobName3 -N $jobName4 -cwd -o ${barcodeDir}/log/$jobName4.log -j y \
    ${thisDir}/../scripts/np_consensus_racon.sh ${barcodeDir}/
 
   # Polish the sample with Medaka
   uuid5=$(uuidgen)
   jobName5="polish-medaka-$uuid5"
-  qsub -hold_jid $jobName4 -N $jobName5 -cwd -o log/$jobName5.log -j y \
+  qsub -hold_jid $jobName4 -N $jobName5 -cwd -o ${barcodeDir}/log/$jobName5.log -j y \
    ${thisDir}/../scripts/np_polish_medaka.sh ${barcodeDir}/
 done
+

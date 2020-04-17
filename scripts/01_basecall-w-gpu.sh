@@ -37,7 +37,9 @@ echo '$USER is set to:' $USER
 
 # Setup tmpdir in /scratch
 # Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
-tmpdir=$(mktemp -p /scratch/$USER/ -d guppy.gpu.XXXXXX)
+tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
+
+# This prints when the script ended and will cleanup the $tmpdir present in /scratch/$USER before exiting
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
@@ -48,7 +50,6 @@ fast5tmp=$tmpdir/fast5
 echo '$fast5tmp dir is set to:' $fast5tmp
 # check to see if basecalling/demultiplexing has been done and files exist in OUTDIR
 # if not, copy files into fast5tmp and begin
-### commenting out so I don't have to keep copying files to /scratch TODO
 if [[ -e  ${OUTDIR}demux/ ]]; then
     echo "Demuxed fastqs present in OUTDIR. Exiting script..."
     exit 0
