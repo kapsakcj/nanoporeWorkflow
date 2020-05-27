@@ -7,7 +7,7 @@
 set -e
 
 NSLOTS=${NSLOTS:=16}
-#echo '$NSLOTS set to:' $NSLOTS
+echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
 
@@ -23,7 +23,7 @@ date
 hostname
 
 # Setup tempdir
-tmpdir=$(mktemp -p . -d nanopolish.XXXXXX)
+tmpdir=$(mktemp -p . -d medaka.XXXXXX)
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 echo "$0: temp dir is $tmpdir";
 
@@ -41,6 +41,13 @@ if [[ -e ${dir}medaka/polished.fasta ]]; then
   exit 0
 fi
 
+# load medaka 1.0.1
+module purge
+module load medaka/1.0.1
+medaka --version
+
 echo "Running Medaka via singularity container..."
-singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.0.8.1.staphb.simg \
-  medaka_consensus -i /data/reads.minlen1000.600Mb.fastq.gz -m r941_min_high -t ${NSLOTS} -o /data/medaka -d /data/racon/ctg.consensus.iteration4.fasta
+## commenting out temporarily, until SciComp adds new medaka singularity image to their repo.
+#singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.0.8.1.staphb.simg \
+#singularity exec --no-home -B ${dir}:/data /scicomp/home/pjx8/singularity-images/medaka.1.0.1.staphb.simg \
+medaka_consensus -i ${dir}/reads.minlen500.600Mb.fastq.gz -m r941_min_high_g360 -t ${NSLOTS} -o ${dir}/medaka -d ${dir}racon/ctg.consensus.iteration4.fasta

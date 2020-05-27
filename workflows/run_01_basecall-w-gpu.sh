@@ -119,4 +119,4 @@ mkdir -pv ${OUTDIR}/log
 # call the actual basecalling script
 # no need to pass variables since they are exported when set above (I think?)
 # qsub will put logs into OUTDIR/log for tidyness
-qsub -o ${OUTDIR}/log ${thisDir}/../scripts/01_basecall-w-gpu.sh
+qsub -q gpu.q -o ${OUTDIR}/log/guppy.log -j y ${thisDir}/../scripts/np_basecall-w-gpu.sh

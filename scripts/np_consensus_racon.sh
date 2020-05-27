@@ -43,7 +43,7 @@ echo '$dir is set to:' ${dir}
 BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
-FASTQ="${dir}reads.minlen1000.600Mb.fastq.gz"
+FASTQ="${dir}reads.minlen500.600Mb.fastq.gz"
 
 # check to see if assembly has been through consensus correction, skip if so
 # TODO - change the -e check here to check for output of racon

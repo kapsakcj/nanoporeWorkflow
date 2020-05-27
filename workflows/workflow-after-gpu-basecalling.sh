@@ -61,10 +61,10 @@ for barcodeDir in ${OUTDIR}demux/barcode[0-12]*; do
 
   # Prep the sample
   uuid2=$(uuidgen)
-  jobName2="prepSample-$uuid2"
+  jobName2="filterSample-$uuid2"
   # removed 'qsub -hold_jid $jobName1' since basecalling should already be done
   qsub -N $jobName2 -cwd -o ${barcodeDir}/log/$jobName2.log -j y \
-    ${thisDir}/../scripts/03_prepSample-w-gpu.sh ${barcodeDir}/
+    ${thisDir}/../scripts/np_filter_filtlong.sh ${barcodeDir}/
   
   # Assemble the sample
   uuid3=$(uuidgen)

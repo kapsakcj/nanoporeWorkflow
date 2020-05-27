@@ -82,5 +82,5 @@ echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 # Assemble.
 echo "Assembling with flye..."
 singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.5.staphb.simg \
-  flye --nano-raw /data/reads.minlen1000.600Mb.fastq.gz -o /data/flye -g 5m --plasmids -t $NSLOTS
+  flye --nano-raw /data/reads.minlen500.600Mb.fastq.gz -o /data/flye -g 5m --plasmids -t $NSLOTS
 
