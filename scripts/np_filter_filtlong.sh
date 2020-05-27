@@ -90,5 +90,5 @@ echo "Finished combining reads and counting read lengths."
 
 # run Filtlong available through SciComp
 singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/filtlong/filtlong.0.2.0.staphb.simg \
-  filtlong -t 600000000 --min_length 1000 /data/all.fastq.gz | pigz > ${dir}reads.minlen1000.600Mb.fastq.gz
+  filtlong -t 600000000 --min_length 500 /data/all.fastq.gz | pigz > ${dir}reads.minlen500.600Mb.fastq.gz
 
