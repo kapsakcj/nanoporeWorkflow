@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -o guppy-gpu.log
 #$ -e guppy-gpu.err
-#$ -n guppy-gpu
+#$ -N guppy-gpu
 #$ -V -cwd
 #$ -pe smp 2
 

@@ -3,7 +3,8 @@
 #$ -e flye.err
 #$ -j y
 #$ -N flye
-#$ -pe smp 2-36
+#$ -pe smp 2-16
+#$ -l h_vmem=64G
 #$ -V -cwd
 set -e
 

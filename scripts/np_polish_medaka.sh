@@ -44,9 +44,8 @@ fi
 # load medaka 1.0.1
 module purge
 module load medaka/1.0.1
-medaka --version
 
-echo "Running Medaka via singularity container..."
+echo "Running Medaka via SCBS module..."
 ## commenting out temporarily, until SciComp adds new medaka singularity image to their repo.
 #singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.0.8.1.staphb.simg \
 #singularity exec --no-home -B ${dir}:/data /scicomp/home/pjx8/singularity-images/medaka.1.0.1.staphb.simg \

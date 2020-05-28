@@ -58,7 +58,7 @@ module load racon/1.3.1
 make_directory ${dir}racon
 
 # align long reads to draft assembly produced by flye/wtdbg2/etc
-if [[ -e ${dir}minimap2/alignment.paf ]]; then
+if [[ -e ${dir}racon/alignment.paf ]]; then
   echo "Reads have already been aligned to draft assembly. Skipping..."
 else
   echo "Aligning reads to draft assembly with minimap2...."

@@ -65,8 +65,8 @@ BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
 # check to see if reads have been compresesd and renamed to all-barcodeXX.fastq.gz
-if [[ -e ${dir}reads.minlen1000.600Mb.fastq.gz ]]; then
-  echo "Reads have been filtered to > 1kb and to the top 600Mb by 03_prepSample script already. Exiting...."
+if [[ -e ${dir}reads.minlen500.600Mb.fastq.gz ]]; then
+  echo "Reads have been filtered to >500bp and to the top 600Mb by np_filter_filtlong.sh script already. Exiting...."
   exit 0
 fi
 
