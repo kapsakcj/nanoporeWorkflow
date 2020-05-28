@@ -161,8 +161,7 @@ $OUTDIR/
 ## Contributing
 If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
 
-## Future plans
-* Detect GPU availability since aspen GPU nodes have 2 V100 cards. `guppy_basecaller -x auto` is the same as saying `-x cuda:0` 👎 
+## Future plans 
 * Add support for passing in a config file to `workflow-after-gpu-basecalling.sh` that contains:
   * Sample ID
   * barcode number (RBK or NBD)
