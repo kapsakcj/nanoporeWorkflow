@@ -13,11 +13,11 @@ make_directory() {
 function HELP {
 echo ""
 echo "Usage: $0 "
-echo "                 -i path/to/fast5files/        "
+echo "                 -i path/to/fast5files/        searches recursively for fast5s"
 echo "                 -o path/to/outputDirectory/   "
 echo "                 -b y || yes || n || no        barcodes used?"
 echo "                 -f r941 || r10                flowcell type used?"
-echo "                 -k rapid || ligation          sequening kit used?"
+echo "                 -k rapid || ligation          sequencing kit used?"
 echo ""
 echo "example: $0 -i fast5s/ -o output/ -b y -f r941 -k rapid"
 echo ""
