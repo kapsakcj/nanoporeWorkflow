@@ -41,7 +41,7 @@ echo '$USER is set to:' $USER
 mkdir -p /tmp/$USER/
 tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
 
-# This prints when the script ended and will cleanup the $tmpdir present in /scratch/$USER before exiting
+# This prints when the script ended and will cleanup the $tmpdir present in /tmp/$USER before exiting
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
@@ -159,7 +159,10 @@ else
   fi
 fi
 
-  
+# move guppy logs into a sub directory, for tidyness
+mkdir -p $tmpdir/demux/guppy-logs
+mv $tmpdir/demux/guppy_basecaller_log*.log $tmpdir/demux/guppy-logs
+
 # if ligation kit was used, use this guppy command for native barcoding kit 
 # SQK-LSK109 + EXP-NBD104, EXP-NBD114 is barcodes 13-24. EXP-NBD103 is the same as EXP-NBD104.
 # EXP-NBD104 is newer and will be around longer as an option in guppy 
