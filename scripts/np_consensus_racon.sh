@@ -46,14 +46,14 @@ echo '$BARCODE is set to:' $BARCODE
 FASTQ="${dir}reads.minlen500.600Mb.fastq.gz"
 
 # check to see if assembly has been through consensus correction, skip if so
-# TODO - change the -e check here to check for output of racon
-if [[ -e ${dir}polished.fasta ]]; then
-  echo "Assembly has already been polished. Exiting...."
+if [[ -e ${dir}racon/ctg.consensus.iteration4.fasta ]]; then
+  echo "Assembly has already been polished 4 times with racon. Exiting...."
   exit 0
 fi
 
+source /etc/profile.d/modules.sh
 module purge
-module load minimap2/2.16
+module load minimap2/2.17
 module load racon/1.3.1
 make_directory ${dir}racon
 
@@ -66,8 +66,10 @@ else
 fi
 
 # run Racon 4 times
+# this check is redundant.... TODO remove it
 if [[ -e ${dir}racon/ctg.consensus.iteration4.fasta ]]; then
   echo "Racon has already generated a consensus sequence. Skipping..."
+  exit 0
 else
   iteration=1
   # while loop to iterate through racon 4 times
