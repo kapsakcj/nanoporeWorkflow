@@ -8,11 +8,11 @@
 #$ -V -cwd
 set -e
 
-# This script will take the output of 03_prepSample-w-gpu.sh and assemble using flye.
+# This script will take the output of np_filter_filtlong.sh and assemble using flye.
 
 ### REQUIREMENTS:
 # singularity
-# access to flye singularity image at /apps/standalone/singularity/flye/flye.2.5.staphb.simg
+# access to flye singularity image at /apps/standalone/singularity/flye/flye.2.7.staphb.simg
 
 ### USAGE:
 # NOTE: barcode-dir/ MUST end with a forward slash '/'
@@ -29,7 +29,7 @@ make_directory() {
     fi
 }
 
-NSLOTS=${NSLOTS:=36}
+NSLOTS=${NSLOTS:=16}
 echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
@@ -77,11 +77,17 @@ echo '$LENGTHS set to:' $LENGTHS
 MINLENGTH=$(zcat "$LENGTHS" | sort -rn | perl -lane 'chomp; $minlength=$_; $cum+=$minlength; $cov=$cum/'$GENOMELENGTH'; last if($cov > '$LONGREADCOVERAGE'); END{print $minlength;}')
 echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 
-# Using Singularity container since it has Flye 2.5 (latest as of Sept 2019)
-#module load flye/2.4.1
+# Using Singularity container since it has Flye 2.7 (latest as of June 2020)
+
+# load singularity since it is not in your PATH by default anymore
+# TODO upgrade to new singularity 3.5 version when module is available
+source /etc/profile.d/modules.sh
+module purge
+module load singularity/2.5-patch
 
 # Assemble.
 echo "Assembling with flye..."
-singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.5.staphb.simg \
+# --no-home removed since singularity 2.5.1 doesn't have the option TODO add when singularity 3.5 module is available
+singularity exec -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.7.staphb.simg \
   flye --nano-raw /data/reads.minlen500.600Mb.fastq.gz -o /data/flye -g 5m --plasmids -t $NSLOTS
 
