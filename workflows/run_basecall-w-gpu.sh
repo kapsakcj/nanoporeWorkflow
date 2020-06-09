@@ -1,6 +1,9 @@
 #!/bin/bash
 # Curtis Kapsak, created May 2019
 
+# This is the driver script for np_basecall-w-gpu.sh script. It takes in 5 arguments and
+# submits jobs to the cluster for GPU basecalling with Guppy and run QC with NanoPlot
+
 #This function will check to make sure the directory doesn't already exist before trying to create it
 make_directory() {
     if [ -e $1 ]; then
@@ -13,8 +16,8 @@ make_directory() {
 function HELP {
 echo ""
 echo "Usage: $0 "
-echo "                 -i path/to/fast5files/        "
-echo "                 -o path/to/outputDirectory/   "
+echo "                 -i path/to/fast5files/        searches recursively for fast5 file"
+echo "                 -o path/to/outputDirectory/   output directory"
 echo "                 -b y || yes || n || no        barcodes used?"
 echo "                 -f r941 || r10                flowcell type used?"
 echo "                 -k rapid || ligation          sequening kit used?"
@@ -99,24 +102,13 @@ if [[ -z "${FLOWCELL}" || -z "${BARCODE}" || -z "${FAST5DIR}" || -z "${OUTDIR}" 
   HELP
 fi
 
-## COMMENTING OUT LOG STUFF SINCE QSUB WILL CREATE LOGS - 1/10/2020
-
-# make $OUTDIR and $OUTDIR/log if it doesn't exist
-#make_directory "${OUTDIR}/log"
-
-# If logfile is found, add two separator lines to separate between different times script was run
-#if find ${OUTDIR}log/logfile-gpu-basecalling.txt 2>/dev/null ;
-#then
-#    cat ${OUTDIR}log/logfile-gpu-basecalling.txt >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
-#    echo "--------------------------------" >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
-#    echo "--------------------------------" >> ${OUTDIR}log/logfile-gpu-basecalling_prev.txt
-#fi
-
 thisDir=$(dirname $0)
 
 mkdir -pv ${OUTDIR}/log
 
 # call the actual basecalling script
-# no need to pass variables since they are exported when set above (I think?)
+# no need to pass variables since they are exported when set above
 # qsub will put logs into OUTDIR/log for tidyness
 qsub -q gpu.q -o ${OUTDIR}/log/guppy.log -j y ${thisDir}/../scripts/np_basecall-w-gpu.sh
+
+qsub -hold_jid guppy-gpu -o ${OUTDIR}/log/nanoplot.log -j y ${thisDir}/../scripts/np_qc_nanoplot.sh
