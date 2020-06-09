@@ -17,7 +17,7 @@ Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](
 
 ## Scripts
 
-This is a collection of scripts that do one thing at a time.  For example, assembling or polishing an assembly [except for `01_basecall-w-gpu.sh` where guppy basecalls and demultiplexes simultaneously ].
+This is a collection of scripts that do one thing at a time.  For example, assembling or polishing an assembly [except for `np_basecall-w-gpu.sh` where guppy basecalls and demultiplexes simultaneously ].
 
 Each script should start with `np_` to indicate the nanopore workflow. Then,
 each script should be named after one of these namespaces, to help indicate which stage of the process.
@@ -40,7 +40,7 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
 
 `run_01_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
 
-`run_01_basecall-w-gpu.sh` is the runner/driver script for `01_basecall-w-gpu.sh`
+`run_01_basecall-w-gpu.sh` is the runner/driver script for `np_basecall-w-gpu.sh`
 
 #### Requirements
 
@@ -51,7 +51,7 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
       * Ligation sequencing kit (SQK-LSK109) + native barcodes 1-24 (NBD103/104/114)
     * R10 flowcell
       * Ligation sequencing kit (SQK-LSK109) + native barcodes 1-24 (NBD103/104/114)
-    * Currently unsupported combos (want to add in the future!):
+  *  Unsupported combos (want to add in the future!):
       * R9.4.1 + rapid or ligation sequencing kit without barcoding (RAD-004)
       * R10 + ligation without barcoding 
       * R10.3 + ligation with & without barcoding
@@ -65,28 +65,28 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
     5. `-k rapid || ligation`         - sequencing kit used?
   * copies fast5s from input directory to `/tmp/$USER/guppy.gpu.XXXXXX`
   * runs `guppy_basecaller` in `hac` or high-accuracy mode on GPUs
-  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD103" or "SQK-RBK004"` options)
+  * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD104 EXP-NBD114" or "SQK-RBK004"` options)
   * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
   * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
  
- #### USAGE:
+ #### INSTALL & USAGE:
 ```bash
-$ wget https://github.com/lskatz/nanoporeWorkflow/archive/v0.4.2.tar.gz 
-$ tar -xzf v0.4.2.tar.gz
+$ wget https://github.com/lskatz/nanoporeWorkflow/archive/v0.4.3.tar.gz 
+$ tar -xzf v0.4.3.tar.gz
 
 # optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo)
-$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.4.2/workflows' >> ~/.bashrc
+$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.4.3/workflows' >> ~/.bashrc
 # refresh your environment
 $ source ~/.bashrc
 
-Usage: /path/to/nanoporeWorkflow-0.4.2/workflows/run_01_basecall-w-gpu.sh
+Usage: /path/to/nanoporeWorkflow-0.4.3/workflows/run_01_basecall-w-gpu.sh
                  -i path/to/fast5files/        
                  -o path/to/outputDirectory/   
                  -b y || yes || n || no        barcodes used?
                  -f r941 || r10                flowcell type used?
                  -k rapid || ligation          sequencing kit used?
 
-example: /path/to/nanoporeWorkflow-0.4.2/workflows/run_01_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
+example: /path/to/nanoporeWorkflow-0.4.3/workflows/run_01_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
 
 # EXAMPLE OUTPUT
 $OUTDIR
@@ -112,16 +112,15 @@ $OUTDIR
   * Takes in 1 argument:
     1. `$outdir` - The output directory from running `run_01_basecall-w-gpu.sh`, containing `demux/barcodeXX/` directories
   * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
-  * Runs `filtlong` via singularity to remove reads <1000bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
+  * Runs `filtlong` via singularity to remove reads <500bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
   * Assembles downsampled/filtered reads using `Flye` via singularity (`--plasmids` and `-g 5M` options used)
   * Polishes flye draft assembly using racon 4 times
-  * Polishes racon polished assembly using Medaka via singularity (specific to r9.4.1 flowcell and high accuracy basecaller, `--m r941_min_high` option used)
+  * Polishes racon polished assembly using Medaka (specific to r9.4.1 flowcell, high accuracy basecaller model, and guppy version 3.6.x, `--m r941_min_high_g360` option used)
 
 #### Requirements
   * Must have previously run the above script that basecalls reads on a GPU node.
   * Must be logged into a server with the ability to `qsub` (Aspen, Monoliths).
-  * `outdir` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
-    * Recommend `cd`'ing to one directory above and use `.` as the `outdir` argument (see USAGE below)
+  * `OUTDIR` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
 
 #### USAGE
 ```bash
@@ -153,7 +152,7 @@ $OUTDIR/
 ```
 #### Notes on assembly and polishing workflow
   * It will check for the following files, to determine if it should skip any of the steps. Helps if one part doesn't run correctly and you don't want to repeat a certain step, e.g. re-assembling.
-    * `03_prepSample-w-gpu.sh` looks for `./demux/barcodeXX/reads.minlen1000.600Mb.fastq.gz` 
+    * `np_filter_filtlong.sh` looks for `./demux/barcodeXX/reads.minlen500.600Mb.fastq.gz` 
     * `np_assemble_flye.sh` looks for `./demux/barcodeXX/flye/assembly.fasta`
     * `np_consensus_racon.sh` looks for `./demux/barcodeXX/racon/ctg.consensus.iteration4.fasta`
     * `np_polish_medaka.sh` looks for `./demux/barcodeXX/medaka/polished.fasta`
@@ -166,7 +165,7 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
   * Sample ID
   * barcode number (RBK or NBD)
   * estimated genome size (to be used as input parameter in various places)
-* Allow users to specify a read length for removing reads w/ `filtlong` (1000 bp could be to stringent if bulk of reads are around that length)
+* Allow users to specify a read length for removing reads w/ `filtlong`
 * Test and add support for `rasusa` for randomly subsampling and filtering reads (`filtlong` is biased towards reads with highest q-scores)
 * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
   * **R10.3** + ligation with native barcodes 1-24 (R10 flowcell discontinued)
