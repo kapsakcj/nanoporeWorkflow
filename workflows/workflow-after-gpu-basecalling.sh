@@ -33,7 +33,7 @@ if [ "$OUTDIR" == "" ]; then
     echo ""
     echo "This workflow runs the following on barcodes 01-12:"
     echo ""
-    echo "-filtlong	removes reads <1000bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
+    echo "-filtlong	removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
     echo "-flye		--plasmids and -g 5M options used"
     echo "-racon		polishes 4X with Racon"
     echo "-medaka		polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile"
