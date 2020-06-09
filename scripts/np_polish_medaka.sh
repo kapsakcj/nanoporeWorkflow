@@ -41,12 +41,14 @@ if [[ -e ${dir}medaka/polished.fasta ]]; then
   exit 0
 fi
 
-# load medaka 1.0.1
+# load singularity since it doesn't do it by default anymore
+# TODO upgrade to new singularity 3.5 version when module is available
+source /etc/profile.d/modules.sh
 module purge
-module load medaka/1.0.1
+module load singularity/2.5-patch
 
-echo "Running Medaka via SCBS module..."
-## commenting out temporarily, until SciComp adds new medaka singularity image to their repo.
-#singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.0.8.1.staphb.simg \
-#singularity exec --no-home -B ${dir}:/data /scicomp/home/pjx8/singularity-images/medaka.1.0.1.staphb.simg \
-medaka_consensus -i ${dir}/reads.minlen500.600Mb.fastq.gz -m r941_min_high_g360 -t ${NSLOTS} -o ${dir}/medaka -d ${dir}racon/ctg.consensus.iteration4.fasta
+# run medaka 
+echo "Running Medaka via Singularity container..."
+# singularity exec --no-home option not in singularity 2.5 TODO add back in
+singularity exec -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.1.0.1.staphb.simg \
+medaka_consensus -i /data/reads.minlen500.600Mb.fastq.gz -m r941_min_high_g360 -t ${NSLOTS} -o /data/medaka -d /data/racon/ctg.consensus.iteration4.fasta
