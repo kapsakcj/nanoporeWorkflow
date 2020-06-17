@@ -27,7 +27,7 @@ export PATH=$thisDir/../scripts:$PATH
 
 # check to see if OUTDIR argument is empty, if so exit script
 if [ "$OUTDIR" == "" ]; then
-    echo "Please supply the path to the output directory from basecalling with the run_01_basecall-w-gpu.sh script"
+    echo "Please supply the path to the output directory from basecalling with the run_basecall-w-gpu.sh script"
     echo ""
     echo "Usage: $thisScript outdir/"
     echo ""
