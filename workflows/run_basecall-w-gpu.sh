@@ -106,9 +106,17 @@ thisDir=$(dirname $0)
 
 mkdir -pv ${OUTDIR}/log
 
+# give guppy-gpu job a unique name
+uuid1=$(uuidgen)
+jobName1="guppy-gpu-$uuid1"
+
 # call the actual basecalling script
 # no need to pass variables since they are exported when set above
 # qsub will put logs into OUTDIR/log for tidyness
-qsub -q gpu.q -o ${OUTDIR}/log/guppy.log -j y ${thisDir}/../scripts/np_basecall-w-gpu.sh
+qsub -N $jobName1 -q gpu.q -o ${OUTDIR}/log/guppy.log -j y ${thisDir}/../scripts/np_basecall-w-gpu.sh
 
-qsub -hold_jid guppy-gpu -o ${OUTDIR}/log/nanoplot.log -j y ${thisDir}/../scripts/np_qc_nanoplot.sh
+# give nanoplot job a unique name
+uuid2=$(uuidgen)
+jobName2="nanoplot-$uuid2"
+
+qsub -N $jobName2 -hold_jid $jobName1 -o ${OUTDIR}/log/nanoplot.log -j y ${thisDir}/../scripts/np_qc_nanoplot.sh
