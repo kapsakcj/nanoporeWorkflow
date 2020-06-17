@@ -34,17 +34,18 @@ in their names (e.g., a namespace of de_multiplex would be invalid.).
 
 This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually.
 
-For `workflow.sh` the first positional parameter must be the project folder.  Both input and output go to the project folder.
-
 ### Guppy GPU basecalling, demultiplexing, and trimming
 
-`run_01_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
+`run_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
 
-`run_01_basecall-w-gpu.sh` is the runner/driver script for `np_basecall-w-gpu.sh`
+`run_basecall-w-gpu.sh` is the runner/driver script for `np_basecall-w-gpu.sh`
 
 #### Requirements
 
-  * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen (Aspen head node, Monoliths)
+  * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen:
+    * Aspen head node
+    * Aspen interactive node (run  `qlogin` from aspen head node)
+    * Monoliths 1-3 (cannot submit jobs from M4)
   * Currently supported MinION data:
     * R9.4.1 flowcell (FLO-MIN106)
       * Rapid barcoding kit (RBK-004)
@@ -69,26 +70,30 @@ For `workflow.sh` the first positional parameter must be the project folder.  Bo
   * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
   * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
  
- #### INSTALL & USAGE:
+#### INSTALL
+Download the repository from the latest release (v0.4.4 is latest as of 17 June 2020) and uncompress.
 ```bash
-$ wget https://github.com/lskatz/nanoporeWorkflow/archive/v0.4.3.tar.gz 
-$ tar -xzf v0.4.3.tar.gz
-
-# optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo)
-$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.4.3/workflows' >> ~/.bashrc
-# refresh your environment
+$ wget https://github.com/lskatz/nanoporeWorkflow/archive/v0.4.4.tar.gz 
+$ tar -xzf v0.4.4.tar.gz
+ ```
+Optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment.
+```bash
+# Be careful with this command - make sure the PATH is properly edited!
+$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.4.4/workflows' >> ~/.bashrc
 $ source ~/.bashrc
-
-Usage: /path/to/nanoporeWorkflow-0.4.3/workflows/run_01_basecall-w-gpu.sh
+```
+ #### USAGE:
+```bash
+Usage: /path/to/nanoporeWorkflow-0.4.4/workflows/run_basecall-w-gpu.sh
                  -i path/to/fast5files/        
                  -o path/to/outputDirectory/   
                  -b y || yes || n || no        barcodes used?
                  -f r941 || r10                flowcell type used?
                  -k rapid || ligation          sequencing kit used?
 
-example: /path/to/nanoporeWorkflow-0.4.3/workflows/run_01_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
+example: /path/to/nanoporeWorkflow-0.4.4/workflows/run_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
 
-# EXAMPLE OUTPUT
+# EXAMPLE OUTPUT (reduced for brevity)
 $OUTDIR
 ├── demux
 │   ├── barcode01
@@ -97,20 +102,26 @@ $OUTDIR
 │   │   └── fastq_runid_fbc8eee46271cbe60ee8a49d0ca657f6e92e174e_0_0.fastq.gz
 │   ├── barcode03
 │   │   └── fastq_runid_fbc8eee46271cbe60ee8a49d0ca657f6e92e174e_0_0.fastq.gz
-│   ├── guppy_basecaller_log-2020-04-17_09-45-00.log
+│   ├── guppy-logs
+│       └── guppy_basecaller_log-2020-04-17_09-45-00.log (there will be many guppy-logs)
+│   ├── nanoplot
+│       └── NanoPlot-report.html # additionally all images and other files produced by NanoPlot
+│   ├── nanoplot-barcoded
+│       └── NanoPlot-report.html # additionally all images and other files produced by NanoPlot, but for each barcode
 │   ├── sequencing_summary.txt
 │   ├── sequencing_telemetry.js
 │   └── unclassified
 │       └── fastq_runid_fbc8eee46271cbe60ee8a49d0ca657f6e92e174e_0_0.fastq.gz
-└── log
-    └── guppy-gpu.o7987624
+└── log # qsub logs
+    └── guppy.log
+    └── nanoplot.log
 ```
 
 ### Assembly with Flye and polishing with Racon and Medaka
 
 #### This workflow does the following:
   * Takes in 1 argument:
-    1. `$outdir` - The output directory from running `run_01_basecall-w-gpu.sh`, containing `demux/barcodeXX/` directories
+    1. `$outdir` - The output directory from running `run_basecall-w-gpu.sh`, containing `demux/barcodeXX/` directories
   * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
   * Runs `filtlong` via singularity to remove reads <500bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
   * Assembles downsampled/filtered reads using `Flye` via singularity (`--plasmids` and `-g 5M` options used)
@@ -119,14 +130,14 @@ $OUTDIR
 
 #### Requirements
   * Must have previously run the above script that basecalls reads on a GPU node.
-  * Must be logged into a server with the ability to `qsub` (Aspen, Monoliths).
+  * Must be logged into a server with the ability to `qsub` (Aspen, Monoliths 1-3).
   * `OUTDIR` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
 
 #### USAGE
 ```bash
-Usage: 
-    # example - if you are one directory above the output directory from the gpu-basecalling script
-    ~/nanoporeWorkflow/workflows/workflow-after-gpu-basecalling.sh outdir/
+# note: ensure that the outdir supplied in this command is the exact same as the outdir you
+# supplied when you ran the run_basecall-w-gpu.sh script
+Usage: /path/to/nanoporeWorkflow-0.4.4/workflows/workflow-after-gpu-basecalling.sh outdir/
 
 # EXAMPLE OUTPUT - only showing one barcode for brevity
 $OUTDIR/
@@ -134,7 +145,7 @@ $OUTDIR/
 │   ├── barcode01
 │   │   ├── all.fastq.gz
 │   │   ├── flye
-│   │   ├── log  # qsub logs
+│   │   ├── log  # qsub logs for each barcode
 │   │   │   ├── assemble-d64ffbc5-4012-44c5-8191-1a57d4a7d15c.log
 │   │   │   ├── polish-medaka-00e52c16-0bd3-460d-b955-3a532be958b1.log
 │   │   │   ├── polish-racon-d7ebc124-d100-43e0-b347-1e60bbc0bf18.log
@@ -143,12 +154,15 @@ $OUTDIR/
 │   │   ├── racon
 │   │   ├── readlengths.txt.gz
 │   │   └── reads.minlen1000.600Mb.fastq.gz
-│   ├── guppy_basecaller_log-2020-04-17_09-45-00.log
+│   ├── guppy-logs
+│   ├── nanoplot
+│   ├── nanoplot-barcoded
 │   ├── sequencing_summary.txt
 │   ├── sequencing_telemetry.js
 │   └── unclassified
-└── log
-    └── guppy-gpu.o7984157
+└── log # qsub logs
+    └── guppy.log
+    └── nanoplot.log
 ```
 #### Notes on assembly and polishing workflow
   * It will check for the following files, to determine if it should skip any of the steps. Helps if one part doesn't run correctly and you don't want to repeat a certain step, e.g. re-assembling.
