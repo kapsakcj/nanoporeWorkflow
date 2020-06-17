@@ -41,14 +41,12 @@ if [[ -e ${dir}medaka/polished.fasta ]]; then
   exit 0
 fi
 
-# load singularity since it doesn't do it by default anymore
-# TODO upgrade to new singularity 3.5 version when module is available
+# load singularity since singularity 3.5.3 is in your path by default (as of 17 June 2020)
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.5-patch
+module load singularity/2.6.1
 
 # run medaka 
 echo "Running Medaka via Singularity container..."
-# singularity exec --no-home option not in singularity 2.5 TODO add back in
-singularity exec -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.1.0.1.staphb.simg \
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.1.0.1.staphb.simg \
 medaka_consensus -i /data/reads.minlen500.600Mb.fastq.gz -m r941_min_high_g360 -t ${NSLOTS} -o /data/medaka -d /data/racon/ctg.consensus.iteration4.fasta

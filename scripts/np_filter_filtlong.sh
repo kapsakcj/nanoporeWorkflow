@@ -88,15 +88,14 @@ zcat ${dir}all.fastq.gz | perl -lne '
 ' | sort -rn | gzip -cf > ${LENGTHS};
 echo "Finished combining reads and counting read lengths."
 
-# load singularity since it doesn't do it by default anymore
-# TODO upgrade to new singularity 3.5 version when module is available
+# load singularity since singularity 3.5.3 is in your path by default
+# TODO ? upgrade to new singularity 3.5.3 ?
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.5-patch
+module load singularity/2.6.1
 
 # run Filtlong
-# --no-home removed since it's not an option in singularity 2.5 TODO add back in when switching to singularity 3.5
 echo "Running filtlong via Singularity container...."
-singularity exec -B ${dir}:/data /apps/standalone/singularity/filtlong/filtlong.0.2.0.staphb.simg \
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/filtlong/filtlong.0.2.0.staphb.simg \
   filtlong -t 600000000 --min_length 500 /data/all.fastq.gz | pigz > ${dir}reads.minlen500.600Mb.fastq.gz
 

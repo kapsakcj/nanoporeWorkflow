@@ -79,15 +79,14 @@ echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 
 # Using Singularity container since it has Flye 2.7 (latest as of June 2020)
 
-# load singularity since it is not in your PATH by default anymore
-# TODO upgrade to new singularity 3.5 version when module is available
+# load singularity since singularity 3.5 is in your PATH by default
+# TODO ? upgrade to new singularity 3.5 version ?
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.5-patch
+module load singularity/2.6.1
 
 # Assemble.
 echo "Assembling with flye..."
-# --no-home removed since singularity 2.5.1 doesn't have the option TODO add when singularity 3.5 module is available
-singularity exec -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.7.staphb.simg \
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/flye/flye.2.7.staphb.simg \
   flye --nano-raw /data/reads.minlen500.600Mb.fastq.gz -o /data/flye -g 5m --plasmids -t $NSLOTS
 
