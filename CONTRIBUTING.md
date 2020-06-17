@@ -6,23 +6,23 @@ Thanks for your interest in contributing to nanoporeWorkflow! Please have a quic
 
 ## Bug fixes
 
-If you have discovered a bug, please report it via the GitHub [issue tracker](https://github.com/lskatz/nanoporeWorkflow/issues).
+If you have discovered a bug, please report it via the GitHub [issue tracker](https://github.com/kapsakcj/nanoporeWorkflow/issues).
 
-Bug-fix [pull requests](https://github.com/lskatz/nanoporeWorkflow/pulls) are always welcome! 
+Bug-fix [pull requests](https://github.com/kapsakcj/nanoporeWorkflow/pulls) are always welcome! 
 
 
 
 ## New features
 
-nanoporeWorkflow's intended scope is to be a modular workflow that can carry out different tasks on Nanopore data. We would be interested in merging it in via a [pull request](https://github.com/lskatz/nanoporeWorkflow/pulls)! Along with your new feature, please make any necessary updates to the [README.md](https://github.com/https://github.com/lskatz/nanoporeWorkflow/blob/master/README.md) file to describe the feature and its usage.
+nanoporeWorkflow's intended scope is to be a modular workflow that can carry out different tasks on Nanopore data. We would be interested in merging it in via a [pull request](https://github.com/kapsakcj/nanoporeWorkflow/pulls)! Along with your new feature, please make any necessary updates to the [README.md](https://github.com/kapsakcj/nanoporeWorkflow/blob/master/README.md) file to describe the feature and its usage.
 
 
 
 ## Other contribution notes
 
 * Pull requests which improve performance (but do not change nanoporeWorkflow's behaviour) are also welcome!
-* nanoporeWorkflow is not using feature branches. I will therefore merge pull requests into the master branch and make a new [release](https://github.com/lskatz/nanoporeWorkflow/releases) when I'm confident that everything works as intended.
-* Don't worry about changing nanoporeWorkflow's version number in your pull request. We will bump the version when I make a new release.
+* nanoporeWorkflow is not using feature branches. I will therefore merge pull requests into the master branch and make a new [release](https://github.com/kapsakcj/nanoporeWorkflow/releases) when I'm confident that everything works as intended.
+* Don't worry about changing nanoporeWorkflow's version number in your pull request. We will bump the version when we make a new release.
 * Adding new dependencies that are not available on SciComp to nanoporeWorkflow is discouraged. Please refrain from doing so unless it is justified.
 
 
