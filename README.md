@@ -73,7 +73,7 @@ This is a collection of workflows in the form of shell scripts.  They `qsub` the
 #### INSTALL
 Download the repository from the latest release (v0.4.4 is latest as of 17 June 2020) and uncompress.
 ```bash
-$ wget https://github.com/lskatz/nanoporeWorkflow/archive/v0.4.4.tar.gz 
+$ wget https://github.com/kapsakcj/nanoporeWorkflow/archive/v0.4.4.tar.gz 
 $ tar -xzf v0.4.4.tar.gz
  ```
 Optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment.
