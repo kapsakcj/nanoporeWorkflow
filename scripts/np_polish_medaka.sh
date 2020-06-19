@@ -36,8 +36,8 @@ echo '$BARCODE is set to:' $BARCODE
 #FASTQ="$dir/all.fastq.gz"
 
 # check to see if assembly has been polished, skip if so
-if [[ -e ${dir}medaka/polished.fasta ]]; then
-  echo "Assembly has already been polished. Exiting...."
+if [[ -e ${dir}medaka/consensus.fasta ]]; then
+  echo "Racon-polished assembly has already been polished. Exiting...."
   exit 0
 fi
 
