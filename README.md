@@ -169,7 +169,7 @@ $OUTDIR/
     * `np_filter_filtlong.sh` looks for `./demux/barcodeXX/reads.minlen500.600Mb.fastq.gz` 
     * `np_assemble_flye.sh` looks for `./demux/barcodeXX/flye/assembly.fasta`
     * `np_consensus_racon.sh` looks for `./demux/barcodeXX/racon/ctg.consensus.iteration4.fasta`
-    * `np_polish_medaka.sh` looks for `./demux/barcodeXX/medaka/polished.fasta`
+    * `np_polish_medaka.sh` looks for `./demux/barcodeXX/medaka/consensus.fasta`
 
 ## Contributing
 If you are interested in contributing to nanoporeWorkflow, please take a look at the [contribution guidelines](CONTRIBUTING.md). We welcome issues or pull requests!
