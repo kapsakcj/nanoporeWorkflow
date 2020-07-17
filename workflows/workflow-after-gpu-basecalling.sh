@@ -3,7 +3,7 @@
 #$ -e workflow-after-gpu.err
 #$ -j y
 #$ -N after-basecalling-workflow
-#$ -pe smp 1-36
+#$ -pe smp 1-24
 #$ -V -cwd
 set -e
 
