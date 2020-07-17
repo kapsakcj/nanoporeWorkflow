@@ -1,11 +1,9 @@
 #!/bin/bash
 #$ -o guppy-gpu.log
-#$ -e guppy-gpu.err
 #$ -N guppy-gpu
 #$ -V -cwd
 #$ -pe smp 2
-
-### -jc guppy #temporarily turned off
+#$ -j y
 
 # Curtis Kapsak pjx8@cdc.gov
 
@@ -62,13 +60,13 @@ fi
 
 
 #### Basecalling using GPU ####
-ml guppy/3.6.1-gpu
+ml guppy/4.0.11-gpu
 
 # moved this line below loading guppy module since a variable in /apps/x86_64/fast5/2.0.1/bin/activate does not get set
 set -u
 
 # defaulting to guppy in high-accuracy mode
-# should return version 3.6.1
+# should return version 4.0.11
 guppy_basecaller -v
 
 # check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
@@ -94,7 +92,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
-                       -x auto 
+                       -x cuda:0 
       fi
     elif [[ "$BARCODE" == "no" ]]; then
       # same guppy command for rapid and ligation -c dna_r10_450bps_hac.cfg
@@ -109,7 +107,7 @@ else
                        --chunks_per_runner 256 \
                        --num_callers $NSLOTS \
                        --compress_fastq \
-                       -x auto
+                       -x cuda:0
     fi
   # R941 -c dna_r9.4.1_450bps_hac.cfg
   elif [[ "$FLOWCELL" == "r941" ]]; then
@@ -126,7 +124,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "SQK-RBK004" \
-                       -x auto                       
+                       -x cuda:0                      
       # R941, ligation, native barcoding 
       elif [[ "$SEQKIT" == "ligation" ]]; then
          guppy_basecaller -i $fast5tmp \
@@ -139,7 +137,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
-                       -x auto
+                       -x cuda:0
       fi
     # same guppy command for rapid and ligation -c dna_r9.4.1_450bps_hac.cfg
     elif [[ "$BARCODE" == "no" ]]; then  
@@ -154,7 +152,7 @@ else
                        --chunks_per_runner 1000 \
                        --num_callers $NSLOTS \
                        --compress_fastq \
-                       -x auto
+                       -x cuda:0
     fi
   fi
 fi
