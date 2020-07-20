@@ -79,8 +79,8 @@ hostname
 # upon exit, print END folowed by date
 trap ' { echo "END - $(date)"; } ' EXIT
 
-# check to see if sample has already been assembled, skip if so
-if [[ -e ${INDIR}/demux/nanoplot/*NanoPlot-report.html ]]; then
+# check to see if nanoplot report has already been generated, skip if so
+if [ -f ${INDIR}/demux/nanoplot/*NanoPlot-report.html ]; then
   echo "NanoPlot report and plots have already been generated for this run. Skipping...."
   exit 0
 fi
