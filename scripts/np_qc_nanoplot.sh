@@ -13,10 +13,16 @@ set -e
 # singularity
 # access to nanoplot singularity image at /apps/standalone/singularity/nanoplot/nanoplot.1.29.0.staphb.simg
 
-# TODO - update usage
-### USAGE:
-#
-# /path/to/nanoporeWorkflow/scripts/np_assemble_flye.sh barcode-dir/
+function HELP {
+echo ""
+echo "Usage: $0 outdir/ yes||no"
+echo ""
+echo "The first argument must be the output directory from run-basecall-w-gpu.sh."
+echo "outdir/demux/sequencing_summary.txt must be present."
+echo ""
+echo "The second argument must be either 'yes' or 'no' to indicate if barcodes were used or not."
+exit 0
+}
 
 #This function will check to make sure the directory doesn't already exist before trying to create it
 make_directory() {
@@ -31,18 +37,40 @@ make_directory() {
 NSLOTS=${NSLOTS:=18}
 echo '$NSLOTS set to:' $NSLOTS
 
-# INDIR should be the output dir from guppy
-# need to be able to access sequencing_summary.txt and sequencing_telemetry.js
+# INDIR should be the output dir from run_basecall-w-gpu.sh script
+# INDIR should have $INDIR/demux/ subdirectory
+# need to be able to access demux/sequencing_summary.txt and demux/sequencing_telemetry.js
+
+# check to make sure INDIR isn't a blank string
 INDIR=$OUTDIR
+if [ "$INDIR" == "" ]; then
+    INDIR=$1
+    if [ "$INDIR" == "" ]; then
+        HELP
+    fi
+fi
 echo '$INDIR is set to:' $INDIR
 
-set -u
+# check to make sure second argument (BARCODE) is set
+# should be set when running run_basecall-w-gpu.sh, but if running this script
+# manually, it will need to be set.
+if [ "$BARCODE" = "" ]; then
+  BARCODE=$2
+  # show HELP if user still did not supply second argument
+  if [ "$BARCODE" == "" ]; then
+    echo "enter yes or no as the second argument to specify if barcodes were used or not"
+    HELP
+  fi
+fi
+echo '$BARCODE is set to ' $BARCODE
 
-if [ "$INDIR" == "" ]; then
-    echo "Usage: $0 outdir-from-gpu-basecalling/"
-    echo ""
-    exit 1;
-fi;
+# check to make sure sequencing_summary.txt exists, if not show help and exit
+if [[ ! -f ${INDIR}/demux/sequencing_summary.txt  ]]; then
+    echo "outdir/demux/sequencing_summary.txt not found. Please adjust the path of your supplied output directory"
+    HELP
+fi
+
+set -u
 
 # Setup any debugging information
 date
@@ -52,7 +80,7 @@ hostname
 trap ' { echo "END - $(date)"; } ' EXIT
 
 # check to see if sample has already been assembled, skip if so
-if [[ -e ${INDIR}nanoplot/*NanoPlot-report.html ]]; then
+if [[ -e ${INDIR}/demux/nanoplot/*NanoPlot-report.html ]]; then
   echo "NanoPlot report and plots have already been generated for this run. Skipping...."
   exit 0
 fi
