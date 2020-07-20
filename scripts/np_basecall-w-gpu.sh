@@ -58,15 +58,13 @@ else
     cp -r $FAST5DIR $fast5tmp
 fi
 
-
 #### Basecalling using GPU ####
-ml guppy/4.0.11-gpu
+ml guppy/4.0.14-gpu
 
 # moved this line below loading guppy module since a variable in /apps/x86_64/fast5/2.0.1/bin/activate does not get set
 set -u
 
-# defaulting to guppy in high-accuracy mode
-# should return version 4.0.11
+# should return version 4.0.14
 guppy_basecaller -v
 
 # check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
@@ -92,6 +90,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
+                       --num_barcode_threads 8 \
                        -x cuda:0 
       fi
     elif [[ "$BARCODE" == "no" ]]; then
@@ -124,6 +123,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "SQK-RBK004" \
+                       --num_barcode_threads 8 \
                        -x cuda:0                      
       # R941, ligation, native barcoding 
       elif [[ "$SEQKIT" == "ligation" ]]; then
@@ -137,6 +137,7 @@ else
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
+                       --num_barcode_threads 8 \
                        -x cuda:0
       fi
     # same guppy command for rapid and ligation -c dna_r9.4.1_450bps_hac.cfg
