@@ -66,30 +66,24 @@ else
 fi
 
 # run Racon 4 times
-# this check is redundant.... TODO remove it
-if [[ -e ${dir}racon/ctg.consensus.iteration4.fasta ]]; then
-  echo "Racon has already generated a consensus sequence. Skipping..."
-  exit 0
-else
-  iteration=1
-  # while loop to iterate through racon 4 times
-  while [ $iteration -le 4 ]
-  do  
-    echo '$iteration =' $iteration
-    echo "Running Racon to generate a consensus..."
-    # if on first iteration, run racon using draft assembly from flye/wtdbg2
-    if [[ $iteration == 1 ]]; then
-      racon -m 8 -x -6 -g -8 -w 500 -t ${NSLOTS} ${FASTQ} ${dir}racon/alignment.paf ${dir}*/assembly.fasta > ${dir}racon/ctg.consensus.iteration${iteration}.fasta
-    else 
-      # if on 2/3/4 iteration, run racon on assembly corrected by prev iteration of racon
-      prev_iteration=$((iteration-1))
-      echo '$prev_iteration =' $prev_iteration
-      # map reads back to consensus-corrected assembly      
-      minimap2 -t ${NSLOTS} -x map-ont ${dir}racon/ctg.consensus.iteration${prev_iteration}.fasta ${FASTQ} > ${dir}racon/alignment.iteration${iteration}.paf
-      # run racon again
-      racon -m 8 -x -6 -g -8 -w 500 -t ${NSLOTS} ${FASTQ} ${dir}racon/alignment.iteration${iteration}.paf ${dir}racon/ctg.consensus.iteration${prev_iteration}.fasta  > ${dir}racon/ctg.consensus.iteration${iteration}.fasta
-    fi
-    # add 1 to iteration counter
-    ((iteration++))
-  done
-fi
+iteration=1
+# while loop to iterate through racon 4 times
+while [ $iteration -le 4 ]
+do  
+  echo '$iteration =' $iteration
+  echo "Running Racon to generate a consensus..."
+  # if on first iteration, run racon using draft assembly from flye/wtdbg2
+  if [[ $iteration == 1 ]]; then
+    racon -m 8 -x -6 -g -8 -w 500 -t ${NSLOTS} ${FASTQ} ${dir}racon/alignment.paf ${dir}*/assembly.fasta > ${dir}racon/ctg.consensus.iteration${iteration}.fasta
+  else 
+    # if on 2/3/4 iteration, run racon on assembly corrected by prev iteration of racon
+    prev_iteration=$((iteration-1))
+    echo '$prev_iteration =' $prev_iteration
+    # map reads back to consensus-corrected assembly      
+    minimap2 -t ${NSLOTS} -x map-ont ${dir}racon/ctg.consensus.iteration${prev_iteration}.fasta ${FASTQ} > ${dir}racon/alignment.iteration${iteration}.paf
+    # run racon again
+    racon -m 8 -x -6 -g -8 -w 500 -t ${NSLOTS} ${FASTQ} ${dir}racon/alignment.iteration${iteration}.paf ${dir}racon/ctg.consensus.iteration${prev_iteration}.fasta  > ${dir}racon/ctg.consensus.iteration${iteration}.fasta
+  fi
+  # add 1 to iteration counter
+  ((iteration++))
+done
