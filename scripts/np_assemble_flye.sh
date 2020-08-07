@@ -83,7 +83,7 @@ echo "Min length for $LONGREADCOVERAGE coverage will be $MINLENGTH";
 # TODO ? upgrade to new singularity 3.5 version ?
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.6.1
+module load singularity/3.5.3
 
 # Assemble.
 echo "Assembling with flye..."

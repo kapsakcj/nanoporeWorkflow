@@ -92,7 +92,7 @@ echo "Finished combining reads and counting read lengths."
 # TODO ? upgrade to new singularity 3.5.3 ?
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.6.1
+module load singularity/3.5.3
 
 # run Filtlong
 echo "Running filtlong via Singularity container...."

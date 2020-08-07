@@ -44,7 +44,7 @@ fi
 # load singularity since singularity 3.5.3 is in your path by default (as of 17 June 2020)
 source /etc/profile.d/modules.sh
 module purge
-module load singularity/2.6.1
+module load singularity/3.5.3
 
 # run medaka 
 echo "Running Medaka via Singularity container..."
