@@ -85,7 +85,7 @@ if [ -f ${INDIR}/demux/nanoplot/*NanoPlot-report.html ]; then
   exit 0
 fi
 
-# Using Singularity container since it has NanoPlot 1.29.0. latest version available in module system is 1.28.0
+# Using Singularity container since it has NanoPlot 1.32.0. latest version available in module system is 1.28.0
 source /etc/profile.d/modules.sh
 module purge
 module load singularity/3.5.3
@@ -98,15 +98,19 @@ echo '$runID is set to:' $runID
 # run NanoPlot
 # 100kb max to make the plots look nicer when there are a few reads >100kb
 echo "Running NanoPlot via singularity container..."
-singularity exec --no-home -B ${INDIR}:/data /apps/standalone/singularity/nanoplot/nanoplot.1.29.0.staphb.simg \
-   NanoPlot --summary /data/demux/sequencing_summary.txt -o /data/demux/nanoplot -t $NSLOTS --loglength --N50 --prefix ${runID}- --maxlength 100000
+# version check
+singularity exec --no-home -B ${INDIR}:/data /apps/standalone/singularity/nanoplot/nanoplot.1.32.0.staphb.sif \
+   NanoPlot --version
+
+singularity exec --no-home -B ${INDIR}:/data /apps/standalone/singularity/nanoplot/nanoplot.1.32.0.staphb.sif \
+   NanoPlot --summary /data/demux/sequencing_summary.txt -o /data/demux/nanoplot -t $NSLOTS --loglength --N50 --prefix ${runID}- --maxlength 100000 --tsv_stats
 
 # run NanoPlot --barcoded, to get barcoded stats (and individual barcode plots if interested in investigating a barcode further)
 # if barcodes were used, additionally run NanoPlot --barcoded
 if [[ "$BARCODE" == "yes" ]]; then
   echo "User specified that barcodes were used. Running NanoPlot --barcoded via singularity container..."
-  singularity exec --no-home -B ${INDIR}:/data /apps/standalone/singularity/nanoplot/nanoplot.1.29.0.staphb.simg \
-  NanoPlot --barcoded --summary /data/demux/sequencing_summary.txt -o /data/demux/nanoplot-barcoded -t $NSLOTS --loglength --N50 --prefix ${runID}- --maxlength 100000
+  singularity exec --no-home -B ${INDIR}:/data /apps/standalone/singularity/nanoplot/nanoplot.1.32.0.staphb.sif \
+  NanoPlot --barcoded --summary /data/demux/sequencing_summary.txt -o /data/demux/nanoplot-barcoded -t $NSLOTS --loglength --N50 --prefix ${runID}- --maxlength 100000 --tsv_stats
 else
   echo "User specified that barcodes were not used. Skipping NanoPlot --barcoded"
 fi
