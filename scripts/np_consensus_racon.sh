@@ -3,7 +3,7 @@
 #$ -e racon.err
 #$ -j y
 #$ -N racon
-#$ -pe smp 2-24
+#$ -pe smp 2-16
 #$ -V -cwd
 set -e
 
