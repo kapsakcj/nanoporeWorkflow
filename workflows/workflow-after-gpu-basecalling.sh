@@ -54,7 +54,7 @@ echo "$0: temp dir is $tmpdir";
 
 # Removed '-pe smp 1-$NSLOTS' from qsub commands since each of the scripts set differing numbers of threads
 # Now that it is demultiplexed, deal with each sample at a time.
-for barcodeDir in ${OUTDIR}demux/barcode[0-12]*; do
+for barcodeDir in ${OUTDIR}demux/barcode{01..24}; do
 
   # make log dir per barcode, for storing qsub log files
   mkdir -pv $barcodeDir/log
