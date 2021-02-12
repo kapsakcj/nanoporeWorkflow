@@ -2,11 +2,12 @@
 #$ -o medaka.log
 #$ -j y
 #$ -N medaka
-#$ -pe smp 2-8
+#$ -pe smp 2
 #$ -V -cwd
 set -e
 
-NSLOTS=${NSLOTS:=8}
+# OK, guess that there is no benefit beyond 2 threads, according to medaka 1.2.0 warning messages
+NSLOTS=${NSLOTS:=2}
 echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
