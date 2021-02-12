@@ -31,7 +31,7 @@ if [ "$OUTDIR" == "" ]; then
     echo ""
     echo "Usage: $thisScript outdir/"
     echo ""
-    echo "This workflow runs the following on barcodes 01-12:"
+    echo "This workflow runs the following on barcodes 01-24:"
     echo ""
     echo "-filtlong	removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
     echo "-flye		--plasmids and -g 5M options used"
@@ -46,11 +46,13 @@ fi;
 date
 hostname
 
+## DON'T THINK I NEED A TMPDIR FOR THIS SCRIPT ##
 # Setup tempdir
-tmpdir=$(mktemp -p . -d ONT-ASM.XXXXXX)
-trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
-mkdir $tmpdir/log
-echo "$0: temp dir is $tmpdir";
+#tmpdir=$(mktemp -p . -d ONT-ASM.XXXXXX)
+#mkdir $tmpdir/log
+#echo "$0: temp dir is $tmpdir";
+
+trap ' { echo "END - $(date)"; } ' EXIT
 
 # Removed '-pe smp 1-$NSLOTS' from qsub commands since each of the scripts set differing numbers of threads
 # Now that it is demultiplexed, deal with each sample at a time.
