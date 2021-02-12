@@ -24,8 +24,10 @@ set -e
 source /etc/profile.d/modules.sh
 module purge
 
-# GPU nodes have 20 threads
-NSLOTS=${NSLOTS:=20}
+# GPU nodes have 20 threads, but using all 20 would cause guppy to crash.
+# --num_callers 2 is hard coded, but #threads for other options set to NSLOTS
+# setting NSLOTS to 4 just incase the variable isn't set beforehand
+NSLOTS=${NSLOTS:=4}
 echo '$NSLOTS is set to:' $NSLOTS
 
 # Setup any debugging information
@@ -59,12 +61,12 @@ else
 fi
 
 #### Basecalling using GPU ####
-ml guppy/4.0.14-gpu
+module load guppy/4.4.1
 
 # moved this line below loading guppy module since a variable in /apps/x86_64/fast5/2.0.1/bin/activate does not get set
 set -u
 
-# should return version 4.0.14
+# print guppy version
 guppy_basecaller -v
 
 # check to see if basecalling has been done by checking OUTDIR/demux/ for sequencing_summary.txt
@@ -86,11 +88,11 @@ else
                        -c dna_r10_450bps_hac.cfg \
                        --gpu_runners_per_device 8 \
                        --chunks_per_runner 256 \
-                       --num_callers $NSLOTS \
+                       --num_callers 2 \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
-                       --num_barcode_threads 8 \
+                       --num_barcode_threads ${NSLOTS} \
                        -x cuda:0 
       fi
     elif [[ "$BARCODE" == "no" ]]; then
@@ -104,7 +106,7 @@ else
                        -c dna_r10_450bps_hac.cfg \
                        --gpu_runners_per_device 8 \
                        --chunks_per_runner 256 \
-                       --num_callers $NSLOTS \
+                       --num_callers 2 \
                        --compress_fastq \
                        -x cuda:0
     fi
@@ -119,11 +121,11 @@ else
                        -c dna_r9.4.1_450bps_hac.cfg \
                        --gpu_runners_per_device 2 \
                        --chunks_per_runner 1000 \
-                       --num_callers $NSLOTS \
+                       --num_callers 2 \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "SQK-RBK004" \
-                       --num_barcode_threads 8 \
+                       --num_barcode_threads ${NSLOTS} \
                        -x cuda:0                      
       # R941, ligation, native barcoding 
       elif [[ "$SEQKIT" == "ligation" ]]; then
@@ -133,11 +135,11 @@ else
                        -c dna_r9.4.1_450bps_hac.cfg \
                        --gpu_runners_per_device 2 \
                        --chunks_per_runner 1000 \
-                       --num_callers $NSLOTS \
+                       --num_callers 2 \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
-                       --num_barcode_threads 8 \
+                       --num_barcode_threads ${NSLOTS} \
                        -x cuda:0
       fi
     # same guppy command for rapid and ligation -c dna_r9.4.1_450bps_hac.cfg
@@ -151,7 +153,7 @@ else
                        -c dna_r9.4.1_450bps_hac.cfg \
                        --gpu_runners_per_device 2 \
                        --chunks_per_runner 1000 \
-                       --num_callers $NSLOTS \
+                       --num_callers 2 \
                        --compress_fastq \
                        -x cuda:0
     fi
