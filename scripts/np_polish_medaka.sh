@@ -2,11 +2,11 @@
 #$ -o medaka.log
 #$ -j y
 #$ -N medaka
-#$ -pe smp 2-16
+#$ -pe smp 2-8
 #$ -V -cwd
 set -e
 
-NSLOTS=${NSLOTS:=16}
+NSLOTS=${NSLOTS:=8}
 echo '$NSLOTS set to:' $NSLOTS
 
 INDIR=$1
@@ -37,7 +37,7 @@ echo '$BARCODE is set to:' $BARCODE
 
 # check to see if assembly has been polished, skip if so
 if [[ -e ${dir}medaka/consensus.fasta ]]; then
-  echo "Racon-polished assembly has already been polished. Exiting...."
+  echo "Racon-polished assembly has already been polished with Medaka. Exiting...."
   exit 0
 fi
 
@@ -46,7 +46,13 @@ source /etc/profile.d/modules.sh
 module purge
 module load singularity/3.5.3
 
-# run medaka 
+# print medaka version; run medaka 
+singularity exec --no-home -B $PWD:/data /apps/standalone/singularity/medaka/medaka.1.2.0.staphb.sif medaka --version
+
 echo "Running Medaka via Singularity container..."
-singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.1.0.1.staphb.simg \
+singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/medaka/medaka.1.2.0.staphb.sif \
 medaka_consensus -i /data/reads.minlen500.600Mb.fastq.gz -m r941_min_high_g360 -t ${NSLOTS} -o /data/medaka -d /data/racon/ctg.consensus.iteration4.fasta
+
+# copy final medaka-polished asm up one to main barcode directory, name it something obvious
+# would be nice to later incorporate sample ID and run ID here later
+cp -nv ${dir}medaka/consensus.fasta ${dir}final.asm.${BARCODE}.fasta
