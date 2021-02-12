@@ -90,9 +90,9 @@ source /etc/profile.d/modules.sh
 module purge
 module load singularity/3.5.3
 
-# pull the 'sample_id' key and value from a guppy_output file. Represents the runID (at least for Jenny's runs)
+# pull the 'protocol_group_id' key and value from a guppy_output file. Represents the runID (at least for Jenny and Katie's runs)
 # grep -m stops searching after first occurrence. cut to pull the value of the sample_id key
-runID=$(grep -m 1 'sample_id' ${INDIR}/demux/sequencing_telemetry.js | cut -d '"' -f 4)
+runID=$(grep -m 1 'protocol_group_id' ${INDIR}/demux/sequencing_telemetry.js | cut -d '"' -f 4)
 echo '$runID is set to:' $runID
 
 # run NanoPlot
