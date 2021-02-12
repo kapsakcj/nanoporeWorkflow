@@ -58,10 +58,10 @@ trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
 make_directory $tmpdir/log
 echo "$0: temp dir is $tmpdir";
 
-dir=$FASTQDIR
+export dir=$FASTQDIR
 echo '$dir is set to:' $dir
 
-BARCODE=$(basename ${dir})
+export BARCODE=$(basename ${dir})
 echo '$BARCODE is set to:' $BARCODE
 
 # check to see if reads have been compresesd and renamed to all-barcodeXX.fastq.gz
@@ -88,14 +88,15 @@ zcat ${dir}all.fastq.gz | perl -lne '
 ' | sort -rn | gzip -cf > ${LENGTHS};
 echo "Finished combining reads and counting read lengths."
 
-# load singularity since singularity 3.5.3 is in your path by default
-# TODO ? upgrade to new singularity 3.5.3 ?
+# load singularity 3.5.3 in case it isn't in your path by default
 source /etc/profile.d/modules.sh
 module purge
 module load singularity/3.5.3
 
 # run Filtlong
+# have to use /bin/bash -c here so that the pipe & pigz is run inside the container and not on host machine
+# this works as long as variables are exported prior to running this and that -e/--cleanenv is not used 
 echo "Running filtlong via Singularity container...."
 singularity exec --no-home -B ${dir}:/data /apps/standalone/singularity/filtlong/filtlong.0.2.0.staphb.simg \
-  filtlong -t 600000000 --min_length 500 /data/all.fastq.gz | pigz > ${dir}reads.minlen500.600Mb.fastq.gz
+  /bin/bash -c 'filtlong -t 600000000 --min_length 500 /data/all.fastq.gz | pigz > ${dir}reads.minlen500.600Mb.fastq.gz'
 
