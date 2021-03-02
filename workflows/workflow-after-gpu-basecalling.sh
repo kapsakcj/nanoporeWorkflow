@@ -3,14 +3,14 @@
 #$ -e workflow-after-gpu.err
 #$ -j y
 #$ -N after-basecalling-workflow
-#$ -pe smp 1-24
+#$ -pe smp 1-4
 #$ -V -cwd
 set -e
 
 source /etc/profile.d/modules.sh
 module purge
 
-NSLOTS=${NSLOTS:=24}
+NSLOTS=${NSLOTS:=4}
 
 OUTDIR=$1
 FAST5DIR=$2
@@ -25,22 +25,42 @@ export PATH=$thisDir/../scripts:$PATH
 #echo '$PATH is set in this order:'
 #echo $PATH | tr ":" "\n" | nl
 
-# check to see if OUTDIR argument is empty, if so exit script
-if [ "$OUTDIR" == "" ]; then
-    echo "Please supply the path to the output directory from basecalling with the run_basecall-w-gpu.sh script"
-    echo ""
+function HELP {
     echo "Usage: $thisScript outdir/"
     echo ""
     echo "This workflow runs the following on barcodes 01-24:"
     echo ""
-    echo "-filtlong	removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
-    echo "-flye		--plasmids and -g 5M options used"
-    echo "-racon		polishes 4X with Racon"
-    echo "-medaka		polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile"
+    echo "filtlong     removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)"
+    echo "flye         assembles reads. --plasmids and -g 5M options used"
+    echo "racon        polishes 4X with Racon"
+    echo "medaka       polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile"
     echo ""
     echo ""
     exit 1;
+}
+
+# check to see if OUTDIR argument is empty, if so exit script
+if [ "$OUTDIR" == "" ]; then
+    echo "Please supply the path to the output directory from basecalling with the run_basecall-w-gpu.sh script"
+    echo
+    HELP
 fi;
+
+# if -h flag is used with script, print HELP/usage statement
+# if any other flags are used, print invalid option and HELP statement
+while getopts ":h" opt; do
+  case ${opt} in
+    h )
+      HELP
+      ;;
+    \?) # unrecognized option
+      echo "Invalid option: $OPTARG" 1>&2
+      HELP
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
 
 # Setup any debugging information
 date
