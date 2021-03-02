@@ -4,41 +4,37 @@ Shell scripts and workflows for working with Nanopore data. Submits jobs to CDC'
 
 :warning: Don't bother reading if you aren't working on CDC's servers :warning:
 
-Started by [@lskatz](https://github.com/lskatz), contributions from [@kapsakcj](https://github.com/kapsakcj) and potentially YOU!
+**There are 2 main workflows:**
+  * `run_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and trimming. Followed by NanoPlot for generating seq run stats and graphs.
+  * `workflow-after-gpu-basecalling.sh` - Assembly with Flye and polishing with Racon and Medaka
 
 ## TOC
-  * [Scripts](#scripts)
+  * [Install](#install)
   * [Workflows](#workflows)
-    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-and-trimming)
+    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-trimming-and-nanoplot)
     * [Assembly with Flye and polishing with Racon and Medaka](#assembly-with-flye-and-polishing-with-racon-and-medaka)
   * [Contributing](#contributing)
   * [Future Plans](#future-plans)
   * [Resources](#resources)
 
-## Scripts
-
-This is a collection of scripts that do one thing at a time.  For example, assembling or polishing an assembly [except for `np_basecall-w-gpu.sh` where guppy basecalls and demultiplexes simultaneously ].
-
-Each script should start with `np_` to indicate the nanopore workflow. Then,
-each script should be named after one of these namespaces, to help indicate which stage of the process.
-Separate each namespace with an underscore. Namespaces may not have underscores
-in their names (e.g., a namespace of de_multiplex would be invalid.).
-
-* basecalling: `basecall` (can be combined with basecalling: `basecall-demux`)
-* demultiplexing: `demux_` (can be combined with basecalling: `basecall-demux`)
-* preparing the data in each barcode: `prepSample_`
-* assembly: `assemble_`
-* polishing: `polish_`
+## Install
+Download the repository from the latest release (v0.5.0 is latest as of March 2021) and uncompress.
+```bash
+$ wget https://github.com/kapsakcj/nanoporeWorkflow/archive/v0.5.0.tar.gz 
+$ tar -xzf v0.5.0.tar.gz
+ ```
+*Optional* - add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment by `source`'ing your `.bashrc` file.
+```bash
+# Be careful with this command - make sure the PATH is properly edited!
+$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.5.0/workflows' >> ~/.bashrc
+$ source ~/.bashrc
+```
 
 ## Workflows
 
-This is a collection of workflows in the form of shell scripts.  They `qsub` the scripts individually.
+### Guppy GPU basecalling, demultiplexing, trimming, and NanoPlot
 
-### Guppy GPU basecalling, demultiplexing, and trimming
-
-`run_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming with `guppy_basecaller`
-
-`run_basecall-w-gpu.sh` is the runner/driver script for `np_basecall-w-gpu.sh`
+`run_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming. Followed by NanoPlot for generating seq run stats and graphs.
 
 #### Requirements
 
@@ -58,40 +54,30 @@ This is a collection of workflows in the form of shell scripts.  They `qsub` the
       * R10.3 + ligation with & without barcoding
 
 #### This workflow does the following:
-  * Takes in 5 arguments:
+  * Takes in 5 arguments (a double pipe `||` is the same as OR):
     1. `-i path/to/fast5files/`      - the input directory containing raw fast5 files
     2. `-o path/to/outputDirectory/` - an output directory
     3. `-b y || yes || n || no`      - were barcodes used?
     4. `-f r941 || r10`              - flowcell type used?
     5. `-k rapid || ligation`         - sequencing kit used?
-  * copies fast5s from input directory to `/tmp/$USER/guppy.gpu.XXXXXX`
-  * runs `guppy_basecaller` in `hac` or high-accuracy mode on GPUs
+  * copies fast5s from input directory to `/scicomp/scratch/$USER/guppy.gpu.XXXXXX`
+  * runs `guppy_basecaller` in high-accuracy mode on a GPU
   * Demultiplexes using `guppy_basecaller` and additionally trims adapter and barcode sequences (using `--trim_barcodes ; --barcode_kits "EXP-NBD104 EXP-NBD114" or "SQK-RBK004"` options)
-  * Compresses (gzip) the demultiplexed reads (`--compress_fastq` option)
+  * Compresses the demultiplexed reads (`--compress_fastq` option)
   * Copies demultiplexed, trimmed, compressed reads into subdirectories in `$OUTDIR/demux/barcodeXX`
- 
-#### INSTALL
-Download the repository from the latest release (v0.4.4 is latest as of 17 June 2020) and uncompress.
-```bash
-$ wget https://github.com/kapsakcj/nanoporeWorkflow/archive/v0.4.4.tar.gz 
-$ tar -xzf v0.4.4.tar.gz
- ```
-Optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment.
-```bash
-# Be careful with this command - make sure the PATH is properly edited!
-$ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.4.4/workflows' >> ~/.bashrc
-$ source ~/.bashrc
-```
+  * Runs `NanoPlot` to generate sequencing run stats on the entire run, as well as individual barcodes.
+
  #### USAGE:
+Pull up help/usage statement by running `run_basecall-w-gpu.sh` or `run_basecall-w-gpu.sh -h`
 ```bash
-Usage: /path/to/nanoporeWorkflow-0.4.4/workflows/run_basecall-w-gpu.sh
-                 -i path/to/fast5files/        
-                 -o path/to/outputDirectory/   
+Usage: /path/to/nanoporeWorkflow-0.5.0/workflows/run_basecall-w-gpu.sh
+                 -i path/to/fast5files/        searches recursively for fast5 files
+                 -o path/to/outputDirectory/   output directory
                  -b y || yes || n || no        barcodes used?
                  -f r941 || r10                flowcell type used?
                  -k rapid || ligation          sequencing kit used?
 
-example: /path/to/nanoporeWorkflow-0.4.4/workflows/run_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
+example: /path/to/nanoporeWorkflow-0.5.0/workflows/run_basecall-w-gpu.sh -i fast5s/ -o output/ -b y -f r941 -k rapid
 
 # EXAMPLE OUTPUT (reduced for brevity)
 $OUTDIR
@@ -119,25 +105,36 @@ $OUTDIR
 
 ### Assembly with Flye and polishing with Racon and Medaka
 
-#### This workflow does the following:
-  * Takes in 1 argument:
-    1. `$outdir` - The output directory from running `run_basecall-w-gpu.sh`, containing `demux/barcodeXX/` directories
-  * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
-  * Runs `filtlong` via singularity to remove reads <500bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
-  * Assembles downsampled/filtered reads using `Flye` via singularity (`--plasmids` and `-g 5M` options used)
-  * Polishes flye draft assembly using racon 4 times
-  * Polishes racon polished assembly using Medaka (specific to r9.4.1 flowcell, high accuracy basecaller model, and guppy version 3.6.x, `--m r941_min_high_g360` option used)
+`workflow-after-gpu-basecalling.sh` - Assembly with Flye and polishing with Racon and Medaka
 
 #### Requirements
-  * Must have previously run the above script that basecalls reads on a GPU node.
+  * Must have previously run the above workflow `run_basecall-w-gpu.sh`
   * Must be logged into a server with the ability to `qsub` (Aspen, Monoliths 1-3).
-  * `OUTDIR` argument must be the same directory as the `OUTDIR` from the gpu-basecalling script
+  * `OUTDIR` argument must be the same directory as the `OUTDIR` from the `run_basecall-w-gpu.sh` workflow
+
+#### This workflow does the following:
+  * Takes in 1 argument:
+    1. `$outdir` - The output directory from running `run_basecall-w-gpu.sh`, which contain `demux/barcodeXX/` subdirectories
+  * Prepares a barcoded sample - concatenates all fastq files into one, compresses, and counts read lengths
+  * Runs `filtlong` to remove reads <500bp and downsample reads to 600 Mb (roughly 120X for a 5 Mb genome)
+  * Assembles downsampled/filtered reads using `flye` (`--plasmids` and `-g 5M` options used)
+  * Polishes flye draft assembly using racon 4 times
+  * Polishes racon polished assembly using Medaka (specific to r9.4.1 flowcell, high accuracy basecaller model, and guppy version 3.6.x, `--m r941_min_high_g360` option used)
+  * Final, polished assembly for each barcode can be found in each barcode subdirectory `demux/barcodeXX/final.asm.barcodeXX.fasta
 
 #### USAGE
+Pull up help/usage statement by running `workflow-after-gpu-basecalling.sh` or `workflow-after-gpu-basecalling.sh -h`
 ```bash
 # note: ensure that the outdir supplied in this command is the exact same as the outdir you
 # supplied when you ran the run_basecall-w-gpu.sh script
-Usage: /path/to/nanoporeWorkflow-0.4.4/workflows/workflow-after-gpu-basecalling.sh outdir/
+Usage: /path/to/nanoporeWorkflow-0.5.0/workflows/workflow-after-gpu-basecalling.sh outdir/
+
+This workflow runs the following on barcodes 01-24:
+
+filtlong     removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)
+flye         assembles reads. --plasmids and -g 5M options used
+racon        polishes 4X with Racon
+medaka       polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile
 
 # EXAMPLE OUTPUT - only showing one barcode for brevity
 $OUTDIR/
@@ -145,6 +142,7 @@ $OUTDIR/
 │   ├── barcode01
 │   │   ├── all.fastq.gz
 │   │   ├── flye
+|   |   ├── final.asm.barcodeXX.fasta
 │   │   ├── log  # qsub logs for each barcode
 │   │   │   ├── assemble-d64ffbc5-4012-44c5-8191-1a57d4a7d15c.log
 │   │   │   ├── polish-medaka-00e52c16-0bd3-460d-b955-3a532be958b1.log
@@ -183,7 +181,6 @@ If you are interested in contributing to nanoporeWorkflow, please take a look at
 * Test and add support for `rasusa` for randomly subsampling and filtering reads (`filtlong` is biased towards reads with highest q-scores)
 * add flags/options for other sequencing kits, barcoding kits, flowcells (direct RNAseq?)
   * **R10.3** + ligation with native barcodes 1-24 (R10 flowcell discontinued)
-* Add option for Medaka polishing with r941_min_fast model, if reads were basecalled with the fast Guppy model
   
 ## Resources
   * https://github.com/fenderglass/Flye
