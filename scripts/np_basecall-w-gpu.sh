@@ -25,21 +25,29 @@ source /etc/profile.d/modules.sh
 module purge
 
 # GPU nodes have 20 threads, but using all 20 would cause guppy to crash.
-# --num_callers 2 is hard coded, but #threads for other options set to NSLOTS
-# setting NSLOTS to 4 just incase the variable isn't set beforehand
-NSLOTS=${NSLOTS:=4}
+# setting NSLOTS to 2 just incase the variable isn't set beforehand
+NSLOTS=${NSLOTS:=2}
 echo '$NSLOTS is set to:' $NSLOTS
+
+### Guppy params ###
+# Going to let Guppy decide numCallers. might auto set to 4 which is fine - CJK 2021-03-02
+#numCallers=2
+gpuRunners=12
+chunksPerRunner=1536
+#echo '$numCallers is set to: ' $numCallers
+echo '$gpuRunners is set to: ' $gpuRunners
+echo '$chunksPerRunner is set to: ' $chunksPerRunner
 
 # Setup any debugging information
 date
 hostname
 echo '$USER is set to:' $USER
 
-# Setup tmpdir in /tmp
-# Cory recommended this since it will be faster than NFS GWA storage, lower latency as well
-# make USER dir in /tmp first, then mktemp inside that
-mkdir -p /tmp/$USER/
-tmpdir=$(mktemp -p /tmp/$USER/ -d guppy.gpu.XXXXXX)
+# Setup tmpdir in /scicomp/scratch
+# This is fast flash storage that is available to all HPC nodes
+# make USER dir in /scicomp/scratch first, then mktemp inside that
+mkdir -p /scicomp/scratch/$USER/
+tmpdir=$(mktemp -p /scicomp/scratch/$USER/ -d guppy.gpu.XXXXXX)
 
 # This prints when the script ended and will cleanup the $tmpdir present in /tmp/$USER before exiting
 trap ' { echo "END - $(date)"; rm -rf $tmpdir; } ' EXIT
@@ -61,7 +69,7 @@ else
 fi
 
 #### Basecalling using GPU ####
-module load guppy/4.4.1
+module load guppy/4.4.2
 
 # moved this line below loading guppy module since a variable in /apps/x86_64/fast5/2.0.1/bin/activate does not get set
 set -u
@@ -86,9 +94,8 @@ else
                        -s $tmpdir/demux \
                        -r \
                        -c dna_r10_450bps_hac.cfg \
-                       --gpu_runners_per_device 8 \
-                       --chunks_per_runner 256 \
-                       --num_callers 2 \
+                       --gpu_runners_per_device ${gpuRunners} \
+                       --chunks_per_runner ${chunksPerRunner} \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
@@ -104,9 +111,8 @@ else
                        -s $tmpdir/demux \
                        -r \
                        -c dna_r10_450bps_hac.cfg \
-                       --gpu_runners_per_device 8 \
-                       --chunks_per_runner 256 \
-                       --num_callers 2 \
+                       --gpu_runners_per_device ${gpuRunners} \
+                       --chunks_per_runner ${chunksPerRunner} \
                        --compress_fastq \
                        -x cuda:0
     fi
@@ -119,9 +125,8 @@ else
                        -s $tmpdir/demux \
                        -r \
                        -c dna_r9.4.1_450bps_hac.cfg \
-                       --gpu_runners_per_device 2 \
-                       --chunks_per_runner 1000 \
-                       --num_callers 2 \
+                       --gpu_runners_per_device ${gpuRunners} \
+                       --chunks_per_runner ${chunksPerRunner} \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "SQK-RBK004" \
@@ -133,9 +138,8 @@ else
                        -s $tmpdir/demux \
                        -r \
                        -c dna_r9.4.1_450bps_hac.cfg \
-                       --gpu_runners_per_device 2 \
-                       --chunks_per_runner 1000 \
-                       --num_callers 2 \
+                       --gpu_runners_per_device ${gpuRunners} \
+                       --chunks_per_runner ${chunksPerRunner} \
                        --compress_fastq \
                        --trim_barcodes \
                        --barcode_kits "EXP-NBD104 EXP-NBD114" \
@@ -151,9 +155,8 @@ else
                        -s $tmpdir/demux \
                        -r \
                        -c dna_r9.4.1_450bps_hac.cfg \
-                       --gpu_runners_per_device 2 \
-                       --chunks_per_runner 1000 \
-                       --num_callers 2 \
+                       --gpu_runners_per_device ${gpuRunners} \
+                       --chunks_per_runner ${chunksPerRunner} \
                        --compress_fastq \
                        -x cuda:0
     fi
