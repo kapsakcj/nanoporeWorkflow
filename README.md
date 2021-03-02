@@ -120,7 +120,7 @@ $OUTDIR
   * Assembles downsampled/filtered reads using `flye` (`--plasmids` and `-g 5M` options used)
   * Polishes flye draft assembly using racon 4 times
   * Polishes racon polished assembly using Medaka (specific to r9.4.1 flowcell, high accuracy basecaller model, and guppy version 3.6.x, `--m r941_min_high_g360` option used)
-  * Final, polished assembly for each barcode can be found in each barcode subdirectory `demux/barcodeXX/final.asm.barcodeXX.fasta
+  * Final, polished assembly for each barcode can be found in each barcode subdirectory `demux/barcodeXX/final.asm.barcodeXX.fasta`
 
 #### USAGE
 Pull up help/usage statement by running `workflow-after-gpu-basecalling.sh` or `workflow-after-gpu-basecalling.sh -h`
