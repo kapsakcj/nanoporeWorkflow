@@ -11,7 +11,7 @@ Shell scripts and workflows for working with Nanopore data. Submits jobs to CDC'
 ## TOC
   * [Install](#install)
   * [Workflows](#workflows)
-    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-and-trimming)
+    * [Guppy GPU basecalling, demultiplexing, and trimming](#guppy-gpu-basecalling-demultiplexing-trimming-and-nanoplot)
     * [Assembly with Flye and polishing with Racon and Medaka](#assembly-with-flye-and-polishing-with-racon-and-medaka)
   * [Contributing](#contributing)
   * [Future Plans](#future-plans)
@@ -23,7 +23,7 @@ Download the repository from the latest release (v0.5.0 is latest as of March 20
 $ wget https://github.com/kapsakcj/nanoporeWorkflow/archive/v0.5.0.tar.gz 
 $ tar -xzf v0.5.0.tar.gz
  ```
-Optionally add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment by `source`'ing your `.bashrc` file.
+*Optional* - add the workflows to your $PATH (edit the PATH below to wherever you downloaded the repo). Refresh your environment by `source`'ing your `.bashrc` file.
 ```bash
 # Be careful with this command - make sure the PATH is properly edited!
 $ echo 'export PATH=$PATH:/path/to/nanoporeWorkflow-0.5.0/workflows' >> ~/.bashrc
@@ -36,7 +36,7 @@ $ source ~/.bashrc
 
 `run_basecall-w-gpu.sh` - Guppy GPU basecalling, demultiplexing, and adapter/barcode trimming. Followed by NanoPlot for generating seq run stats and graphs.
 
-## Requirements
+#### Requirements
 
   * Must be logged into a server with the ability to run `qsub` for submitting jobs to Aspen:
     * Aspen head node
@@ -71,8 +71,8 @@ $ source ~/.bashrc
 Pull up help/usage statement by running `run_basecall-w-gpu.sh` or `run_basecall-w-gpu.sh -h`
 ```bash
 Usage: /path/to/nanoporeWorkflow-0.5.0/workflows/run_basecall-w-gpu.sh
-                 -i path/to/fast5files/        
-                 -o path/to/outputDirectory/   
+                 -i path/to/fast5files/        searches recursively for fast5 files
+                 -o path/to/outputDirectory/   output directory
                  -b y || yes || n || no        barcodes used?
                  -f r941 || r10                flowcell type used?
                  -k rapid || ligation          sequencing kit used?
@@ -105,6 +105,8 @@ $OUTDIR
 
 ### Assembly with Flye and polishing with Racon and Medaka
 
+`workflow-after-gpu-basecalling.sh` - Assembly with Flye and polishing with Racon and Medaka
+
 #### Requirements
   * Must have previously run the above workflow `run_basecall-w-gpu.sh`
   * Must be logged into a server with the ability to `qsub` (Aspen, Monoliths 1-3).
@@ -126,6 +128,13 @@ Pull up help/usage statement by running `workflow-after-gpu-basecalling.sh` or `
 # note: ensure that the outdir supplied in this command is the exact same as the outdir you
 # supplied when you ran the run_basecall-w-gpu.sh script
 Usage: /path/to/nanoporeWorkflow-0.5.0/workflows/workflow-after-gpu-basecalling.sh outdir/
+
+This workflow runs the following on barcodes 01-24:
+
+filtlong     removes reads <500bp and downsamples to 600Mb (roughly 120X for 5Mb genome)
+flye         assembles reads. --plasmids and -g 5M options used
+racon        polishes 4X with Racon
+medaka       polishes once with Medaka using r9.4.1 pore and HAC guppy basecaller profile
 
 # EXAMPLE OUTPUT - only showing one barcode for brevity
 $OUTDIR/
